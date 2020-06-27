@@ -70,8 +70,7 @@ Os parâmetros esperados pelo script são:
 - `$2`: Ambiente [dev, prod]
 - `$3`: Opções extras do Terraform. Examplo: -auto-approve
 
-#### Examples
-
+#### Examplos
 
 Exibindo estado atual da infra:
 ```bash
