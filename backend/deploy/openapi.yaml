@@ -1,0 +1,83 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Backend API
+  description: Backend API
+  contact:
+    email: deniofriacamoreirajr@gmail.com
+
+tags:
+- name: Statuses
+  description: Application status
+
+paths:
+  /status:
+    get:
+      tags:
+      - Statuses
+      summary: Application Statuses
+      operationId: checkApplicationStatus
+      description: Checks the application status
+      produces:
+      - application/json
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/StatusesResponse'
+        503:
+          description: Service Unavailable
+  /ready:
+    get:
+      tags:
+      - Statuses
+      summary: Application Readiness
+      operationId: checkApplicationReadiness
+      description: Checks if all application services are ready
+      produces:
+      - application/json
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/StatusesResponse'
+        503:
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/ReadinessResponse'
+  /healthz:
+    get:
+      tags:
+      - Statuses
+      summary: Application Health
+      operationId: Healthz
+      description: Checks the application health.
+      produces:
+      - application/json
+      responses:
+        200:
+          description: search results matching criteria
+          schema:
+            $ref: '#/definitions/StatusesResponse'
+        503:
+          description: Service Unavailable
+definitions:
+  StatusesResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        enum: ['OK', 'ERROR']
+        example: 'OK'
+  ReadinessResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        enum: ['OK', 'ERROR']
+        example: 'ERROR'
+
+host: virtserver.swaggerhub.com
+basePath: /deniojunior/backend-api/1.0.0
+schemes:
+ - https
