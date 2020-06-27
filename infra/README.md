@@ -60,7 +60,7 @@ aws_secret_access_key=XXXXXXXXXX
 region=us-east-1
 ```
 
-### Running
+### Executando
 
 Para executar, utilize o script `happ.sh`. O script foi adicionado para automatizar o controle do `terraform.state`, realizando o download e o upload para o S3, mantendo o estado atual da infra gerenciado.
 
