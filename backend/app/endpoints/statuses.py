@@ -14,7 +14,7 @@ def is_alive_request():
 
 @blueprint.route('/healthz', methods=['GET', 'OPTIONS'])
 def google_healthz():
-    """ Endpoint used by Google Ingress health check """
+    """Health check endpoint"""
     return make_response(jsonify({"status": "OK"}), 200)
 
 
