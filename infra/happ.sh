@@ -15,7 +15,9 @@ ENV=$2
 EXTRA_OPS=$3
 
 function setup {
-  export TF_VAR_bucket_name="happ.$ENV"
+  if [[ -z "${TF_VAR_bucket_name}" ]]; then
+    export TF_VAR_bucket_name="happ.$ENV"
+  fi
 
   aws s3 cp s3://$TF_VAR_bucket_name/terraform/terraform.tfstate ./ || \
     printf "\nUnable to download Terraform State file from S3 Bucket.\n\n"
