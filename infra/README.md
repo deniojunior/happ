@@ -66,34 +66,34 @@ Para executar, utilize o script `happ.sh`. O script foi adicionado para automati
 
 Os parâmetros esperados pelo script são:
 
-- `$1`: Operation [apply, plan, destroy, show]
-- `$2`: Environment [dev, prod]
-- `$3`: Terraform extra options. Example: -auto-approve
+- `$1`: Operação [apply, plan, destroy, show]
+- `$2`: Ambiente [dev, prod]
+- `$3`: Opções extras do Terraform. Examplo: -auto-approve
 
 #### Examples
 
-Show current infrastructure:
 
+Exibindo estado atual da infra:
 ```bash
 ./happ.sh show dev
 ```
 
-Plan your changes:
+Planejando as alterações a serem aplicadas:
 ```bash
 ./happ.sh plan dev
 ```
 
-Applying changes:
+Aplicando as alterações na infra:
 ```bash
 ./happ.sh apply dev
 ```
 
-For script porpouses you can apply your changes without confirmation:
-```bash
-./happ.sh apply dev -auto-approve
-```
-
-Destroying the current infrastructure:
+Destruindo a infra atual:
 ```bash
 ./happ.sh destroy dev
+```
+
+Para scripts, é possível utilizar o comando abaixo para evitar uma confirmação como entrada:
+```bash
+./happ.sh apply dev -auto-approve
 ```
