@@ -20,6 +20,6 @@ module "s3_bucket" {
   tags = {
     Application = var.app
     Environment = var.env
-    Name        = "${local.resource}-s3-bucket"
+    Name        = var.bucket_name
   }
 }
