@@ -48,8 +48,9 @@ jobs:
       run: |
         export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
 
-        echo "export ecr_repository=$(terraform output ecr_repository)" >> terraform.outputs
-        echo "ecr_repository_url=$(terraform output ecr_repository_url)" >> terraform.outputs
+        echo "export ecr_repository=::set-output name=stdout::$(terraform output ecr_repository)" >> terraform.outputs
+        echo "ecr_repository_url=::set-output name=stdout::$(terraform output ecr_repository_url)" >> terraform.outputs
+        echo "frontend_bucket=::set-output name=stdout::$(terraform output frontend_bucket)" >> terraform.outputs
         
         aws s3 cp terraform.outputs s3://$S3_BUCKET
       working-directory: ./infra
