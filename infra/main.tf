@@ -20,9 +20,22 @@ module "s3_bucket" {
   acl           = "private"
   force_destroy = true
 
+  website = {
+    index_document = "index.html"
+  }
+
   tags = {
     Application = var.app
     Environment = var.env
     Name        = "${local.resource}-frontend"
+  }
+}
+
+resource "aws_ecr_repository" "ecr_registry" {
+  name                 = local.resource
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
   }
 }
