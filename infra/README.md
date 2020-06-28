@@ -39,6 +39,10 @@ sudo apt-get install awscli
 
 Configure as suas credenciais da AWS:
 
+```bash
+aws configure
+```
+
 Caso prefira, também é possível configurar as credenciais criando o arquivo de credenciais de forma manual:
 
 Crie o diretório `.aws` no seu home e crie o arquivo `credentials` dentro:
