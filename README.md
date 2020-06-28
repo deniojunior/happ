@@ -1,9 +1,8 @@
 <h1> <img src="./icon.png"
   width="48"
   height="48"
-  style="float:left;">Happ
-
---- 
+  style="float:left;"> 
+# Happ
 
 Happ é um projeto que provém uma infraestrutura completa para servir aplicações frontend e backend com alta disponibilidade, segurança, escalabilidade e tolerância a falhas.
 
