@@ -23,14 +23,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: us-east-1
 
-      - name: 'Terraform Setup Workspace'
-        uses: hashicorp/terraform-github-actions@master
+      - name: Terraform Setup Workspace
+        id: workspace
+        uses: recarnot/terraform-github-workspace-setup-action@master
         with:
-          tf_actions_version: 0.12.28
-          tf_actions_subcommand: 'workpace new dev'
-          tf_actions_working_dir: './infra/'
-        env:
-          TF_WORKSPACE: dev
+          workspace: "dev"
 
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
