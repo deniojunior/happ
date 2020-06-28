@@ -5,8 +5,10 @@
 Happ
 
 ### 
-
 Happ é um projeto que provém uma infraestrutura completa para servir aplicações frontend e backend com alta disponibilidade, segurança, escalabilidade e tolerância a falhas.
+
+![Arquitetura HTMKT](https://user-images.githubusercontent.com/22299426/85886829-21ae6280-b7bd-11ea-907f-a4b165a80952.png)
+![Arquitetura HTMKT - pt2 (2)](https://user-images.githubusercontent.com/22299426/85888103-50c5d380-b7bf-11ea-9b84-3bbe98ba9c36.png)
 
 ### Estrutura
 
@@ -15,6 +17,8 @@ Para centralizar, foram todos os projetos referentes ao **happ** foram incluído
 - **/frontend:** Aplicação frontend simples feita em React
 - **/backend:** Aplicação backend simples, sendo uma API básica feita em Python com Flask
 - **/infra:** Código IaC feito com Terraform descrevendo a infraestrutura da aplicação
+
+### Documentação
 
 Cada um dos diretórios acima possuem o seu arquivo `README` próprio, junto das instruções de configuração para rodar os projetos no ambiente local. Tanto as aplicações **frontend** e **backend** possuem um `Dockerfile`, bem como as instruções para rodar as aplicações como container. Em relação ao projeto de **infra**, o readme dá todas as instruções para configuração do Terraform e as instruções para criação da infra na Cloud.
 
@@ -31,6 +35,6 @@ Conforme mencionado por lá, o projeto foi dividido em Milestones e acompanhado 
 
 O primeiro Milestone foi somente tarefas operacionais iniciais e planejamentos de estrutura e arquitetura. Deixo abaixo o link rápido para os assuntos mais importantes:
 
-- **Fluxo de entrega:** https://github.com/deniojunior/happ/issues/4
-- **Arquitetura da Infra:** https://github.com/deniojunior/happ/issues/3
-- **Análise de custos** https://github.com/deniojunior/happ/issues/3#issuecomment-650566656
+- **[Fluxo de entrega](https://github.com/deniojunior/happ/issues/4#issuecomment-650580765)**
+- **[Decisões de arquitetura](https://github.com/deniojunior/happ/issues/3#issuecomment-649901316)** 
+- **[Análise de custos](https://github.com/deniojunior/happ/issues/3#issuecomment-650566656)**
