@@ -10,7 +10,7 @@ on:
 
 jobs:
   infra:
-    name: 'Infra'
+    name: 'Infra - Terraform'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -52,7 +52,7 @@ jobs:
 
   backend:
     needs: [infra]
-    name: 'Backend'
+    name: 'Backend - Python'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -90,8 +90,8 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        echo "$ECR_REPOSITORY"
-        echo "$ECR_REPOSITORY_URL"
+        echo "${ECR_REPOSITORY}"
+        echo "${ECR_REPOSITORY_URL}"
         docker build -t $ECR_REPOSITORY -t $ECR_REPOSITORY:${{ github.sha }} .
         docker tag $ECR_REPOSITORY:latest $ECR_REPOSITORY_URL:latest
         docker push $ECR_REPOSITORY_URL:latest
