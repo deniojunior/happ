@@ -72,6 +72,25 @@ Após executar o apply, o módulo gera o arquivo **`backend.tf`** com as especif
 
 Além do controle de estado, a ideia do uso deste módulo é abstrair a necessidade de especificação de um arquivo de configuração de backend de forma manual.
 
+### Namespace
+
+Para evitar conflitos como nome de bucket, que devem ser únicos, adicionei a variável namespace, a qual define o **`namespace`**, a qual é adicionada no padrão de nomeclatura do projeto.
+
+O namespace default está definido nos arquivos de variáveis: `values/dev.tfvars` e `values/prod.tfvars`.
+
+Para criar os recuros com um outro namespace basta adicionar a seguinte opção na frente dos comandos de execução comando 
+
+```bash
+-var="namespace=hm"
+```
+
+Exemplos:
+
+```bash
+terraform plan -var-file=values/dev.tfvars -var="namespace=hm"
+terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
+```
+
 ### Executando
 
 Setando o workspace:
