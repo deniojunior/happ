@@ -47,8 +47,9 @@ jobs:
     - name: Terraform Outputs
       id: terraform_outputs
       run: |
-        echo "::set-output ecr_repository=$(terraform output ecr_repository)"
-        echo "::set-output ecr_repository_url=$(terraform output ecr_repository_url)"
+        echo "export ecr_repository=$(terraform output ecr_repository)" >> terraform.outputs
+        echo "ecr_repository_url=$(terraform output ecr_repository_url)" >> terraform.outputs
+        cat terraform.outputs
       working-directory: ./infra
 
   backend:
@@ -88,11 +89,6 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-    - name: Build and Deploy
-      run: |
-        echo "${{ infra.steps.terraform_outputs.outputs.ecr_repository }}"
-        echo "${{ infra.steps.terraform_outputs.outputs.ecr_repository_url }}"
-      working-directory: ./backend/
 
     # - name: Build and Deploy
     #   run: |
