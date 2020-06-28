@@ -8,7 +8,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Frontend App is running &#128516;
+          Frontend App is running =);
         </p>
 
       </header>
