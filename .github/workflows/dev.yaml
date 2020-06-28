@@ -156,6 +156,10 @@ jobs:
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
-        aws s3 sync ./build s3://$S3_BUCKET
+        if [ $(aws s3 ls s3://happ-deniojunior-dev-frontend/latest | wc -l) <> 0 ]; then
+          aws s3 mv s3://$frontend_bucket/latest s3://$frontend_bucket/${{ github.sha }} --recursive
+        fi
+        
+        aws s3 sync ./build s3://$frontend_bucket/latest
       working-directory: ./frontend/
   
