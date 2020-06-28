@@ -8,7 +8,6 @@ Happ
 Happ é um projeto que provém uma infraestrutura completa para servir aplicações frontend e backend com alta disponibilidade, segurança, escalabilidade e tolerância a falhas.
 
 ![Arquitetura HTMKT](https://user-images.githubusercontent.com/22299426/85886829-21ae6280-b7bd-11ea-907f-a4b165a80952.png)
-![Arquitetura HTMKT - pt2 (2)](https://user-images.githubusercontent.com/22299426/85888103-50c5d380-b7bf-11ea-9b84-3bbe98ba9c36.png)
 
 ### Estrutura
 
