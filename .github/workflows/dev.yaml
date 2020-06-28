@@ -44,6 +44,12 @@ jobs:
       run: terraform apply -var-file="values/dev.tfvars" -auto-approve
       working-directory: ./infra
 
+    - name: Terraform Outputs
+      run: |
+        export ECR_REPOSITORY=$(terraform output ecr_repository)
+        export ECR_REPOSITORY_URL=$(terraform output ecr_repository_url)
+      working-directory: ./infra
+
   backend:
     needs: [infra]
     name: 'Backend'
@@ -69,11 +75,9 @@ jobs:
         aws-region: us-east-1
     
     - name: Install dependencies
-      run: pipenv sync --dev --three
-      working-directory: ./backend/
-    
-    - name: Run tests
-      run: pipenv run coverage run --omit="tests/*" --include="app/*" --branch -m unittest discover -s tests/unit -p "*_test.py"
+      run: |
+        sudo pip install pipenv
+        pipenv sync --dev --three
       working-directory: ./backend/
     
     - name: Run tests
