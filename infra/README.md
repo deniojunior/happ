@@ -98,16 +98,16 @@ Removendo a configuração de state:
 rm -rf backend.tf
 ```
 
-Setando o workspace:
-
-```bash
-terraform workspace new dev
-```
-
 Inicializando os módulos:
 
 ```bash
 terraform init
+```
+
+Setando o workspace:
+
+```bash
+terraform workspace new dev
 ```
 
 Validando a configuração:
@@ -126,6 +126,12 @@ Aplicando as alterações:
 
 ```bash
 terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
+```
+
+Destruindo a infra criada:
+
+```bash
+terraform destroy -var-file=values/dev.tfvars -var="namespace=hm"
 ```
 
 ## Arquitetura
