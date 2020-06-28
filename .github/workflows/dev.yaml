@@ -92,7 +92,8 @@ jobs:
       run: |
         echo "${ECR_REPOSITORY}"
         echo "${ECR_REPOSITORY_URL}"
-        docker build -t $ECR_REPOSITORY -t $ECR_REPOSITORY:${{ github.sha }} .
+        docker build -t $ECR_REPOSITORY .
+        docker build -t $ECR_REPOSITORY:${{ github.sha }} .
         docker tag $ECR_REPOSITORY:latest $ECR_REPOSITORY_URL:latest
         docker push $ECR_REPOSITORY_URL:latest
         docker tag $ECR_REPOSITORY:${{ github.sha }} $ECR_REPOSITORY_URL:${{ github.sha }}
