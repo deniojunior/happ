@@ -17,9 +17,9 @@ module "terraform_state_backend" {
 module "s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
-  bucket        = "${local.resource}-frontend"
-  acl           = "private"
-  force_destroy = true
+  bucket              = "${local.resource}-frontend"
+  acl                 = "private"
+  force_destroy       = true
 
   website = {
     index_document = "index.html"
@@ -30,6 +30,25 @@ module "s3_bucket" {
     Environment = var.env
     Name        = "${local.resource}-frontend"
   }
+
+    policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPublicReadAccess",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::example-bucket/*"
+      ]
+    }
+  ]
+}
+POLICY
 }
 
 resource "aws_ecr_repository" "ecr_registry" {
