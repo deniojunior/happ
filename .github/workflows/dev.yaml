@@ -151,6 +151,11 @@ jobs:
       working-directory: ./frontend/
     
     - name: Deploy to S3
-      run: aws s3 sync ./build s3://$S3_BUCKET_NAME
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+        
+        aws s3 sync ./build s3://$S3_BUCKET_NAME
       working-directory: ./frontend/
   
