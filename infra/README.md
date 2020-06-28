@@ -72,6 +72,13 @@ Após executar o apply, o módulo gera o arquivo **`backend.tf`** com as especif
 
 Além do controle de estado, a ideia do uso deste módulo é abstrair a necessidade de especificação de um arquivo de configuração de backend de forma manual.
 
+Para executar o projeto no ambiente local, você precisa apenas excluir o arquivo `backend.tf`:
+
+```bash
+rm -rf backend.tf
+```
+
+
 ### Namespace
 
 Para evitar conflitos como nome de bucket, que devem ser únicos, adicionei a variável namespace, a qual define o **`namespace`**, a qual é adicionada no padrão de nomeclatura do projeto.
@@ -84,14 +91,12 @@ Para criar os recuros com um outro namespace basta adicionar a seguinte opção 
 -var="namespace=hm"
 ```
 
-Exemplos:
-
-```bash
-terraform plan -var-file=values/dev.tfvars -var="namespace=hm"
-terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
-```
-
 ### Executando
+
+Removendo configuração de state:
+```bash
+rm -rf backend.tf
+```
 
 Setando o workspace:
 
@@ -105,13 +110,7 @@ Inicializando os módulos:
 terraform init
 ```
 
-Inicializando os módulos:
-
-```bash
-terraform init
-```
-
-Validando os arquivos:
+Validando a configuração:
 
 ```bash
 terraform validate
@@ -120,15 +119,13 @@ terraform validate
 Planejando as alterações:
 
 ```bash
-terraform plan -var-file=values/[env].tfvars
+terraform plan -var-file=values/dev.tfvars -var="namespace=hm"
 ```
-
-Substitura o `[env]` pelo ambiente que irá aplicar as alterações. Exemplo: dev, prod
 
 Aplicando as alterações:
 
 ```bash
-terraform apply -var-file=values/[env].tfvars
+terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
 ```
 
 ## Arquitetura
