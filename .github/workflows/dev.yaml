@@ -51,7 +51,7 @@ jobs:
         echo "export ecr_repository=$(terraform output ecr_repository)" >> terraform.outputs
         echo "ecr_repository_url=$(terraform output ecr_repository_url)" >> terraform.outputs
         
-        aws s3 sync terraform.outputs s3://S3_BUCKET
+        aws s3 cp terraform.outputs s3://$S3_BUCKET
       working-directory: ./infra
 
   backend:
