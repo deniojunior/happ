@@ -1,2 +1,3 @@
-env = "dev"
-app = "happ"
+env       = "dev"
+app       = "happ"
+namespace = "deniojunior"
