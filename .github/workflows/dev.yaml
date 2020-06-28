@@ -37,11 +37,17 @@ jobs:
     - name: Terraform Validate
       run: terraform validate
       working-directory: ./infra
+      env: 
+        TF_WORKSPACE: "dev"
 
     - name: Terraform Plan
-      run: ls
+      run: terraform plan -var-file="values/dev.tfvars"
       working-directory: ./infra
-      #run: terraform plan -var-file="values/dev.tfvars"
+      env: 
+        TF_WORKSPACE: "dev"
 
     - name: Terraform Apply
       run: terraform apply -var-file="values/dev.tfvars" -auto-approve
+      working-directory: ./infra
+      env: 
+        TF_WORKSPACE: "dev"
