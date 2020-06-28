@@ -43,5 +43,7 @@ docker build -t backend-api .
 Para rodar um container, execute:
 
 ```bash
-docker container run -p 80:8080 -d --name my-app backend-api
+docker container run -p 8080:8080 -d --name backend-app backend-api
 ```
+
+A pós subir o container, a aplicação estará disponível no endereço: [http://localhost:8080](http://localhost:8080)
