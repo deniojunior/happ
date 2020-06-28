@@ -97,7 +97,7 @@ jobs:
 
     - name: Build and Deploy
       run: |
-        export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        export S3_BUCKET="$(cat infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
