@@ -28,7 +28,7 @@ jobs:
       with:
         terraform_version: 0.12.28
     
-        - name: Terraform Setup Workspace
+    - name: Terraform Setup Workspace
       run: terraform workspace new dev
 
     - name: Terraform Init
