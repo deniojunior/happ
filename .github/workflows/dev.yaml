@@ -30,8 +30,9 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-      env: TF_WORKSPACE="dev"
       working-directory: ./infra
+      env: 
+        TF_WORKSPACE: "dev"
 
     - name: Terraform Validate
       run: terraform validate
