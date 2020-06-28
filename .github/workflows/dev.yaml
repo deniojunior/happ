@@ -47,7 +47,7 @@ jobs:
           tf_actions_version: 0.12.28
           tf_actions_subcommand: 'plan'
           tf_actions_working_dir: './infra/'
-          args: '-var-file="dev.tfvars"'
+          args: '-var-file="values/dev.tfvars"'
         env:
           TF_WORKSPACE: dev
 
@@ -57,4 +57,4 @@ jobs:
           tf_actions_version: 0.12.28
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: './infra/'
-          args: '-var-file="dev.tfvars"'
+          args: '-var-file="values/dev.tfvars"'
