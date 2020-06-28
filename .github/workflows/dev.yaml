@@ -47,9 +47,12 @@ jobs:
     - name: Terraform Outputs
       id: terraform_outputs
       run: |
+        export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+
         echo "export ecr_repository=$(terraform output ecr_repository)" >> terraform.outputs
         echo "ecr_repository_url=$(terraform output ecr_repository_url)" >> terraform.outputs
-        cat terraform.outputs
+        
+        aws s3 cp terraform.outputs s3://S3_BUCKET/terraform.outputs
       working-directory: ./infra
 
   backend:

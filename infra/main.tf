@@ -12,6 +12,7 @@ module "terraform_state_backend" {
   terraform_backend_config_file_path = "."
   terraform_backend_config_file_name = "backend.tf"
   force_destroy                      = false
+  prevent_unencrypted_uploads        = false
 }
 
 module "s3_bucket" {
