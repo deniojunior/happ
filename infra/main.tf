@@ -1,12 +1,10 @@
 locals {
-  resource = "${var.app}.${var.env}"
+  resource = "${var.app}-${var.namespace}-${var.env}"
 }
 
 module "terraform_state_backend" {
   source                             = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=master"
-  namespace                          = "happ"
-  delimiter                          = "."
-  stage                              = var.env
+  namespace                          = "${var.app}-${var.namespace}"
   name                               = "terraform"
   attributes                         = ["state"]
   region                             = "us-east-1"
@@ -18,13 +16,13 @@ module "terraform_state_backend" {
 module "s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
-  bucket        = "${local.resource}.frontend"
+  bucket        = "${local.resource}-frontend"
   acl           = "private"
   force_destroy = true
 
   tags = {
     Application = var.app
     Environment = var.env
-    Name        = "${local.resource}.frontend"
+    Name        = "${local.resource}-frontend"
   }
 }
