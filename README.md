@@ -1,6 +1,5 @@
-# :construction: Trabalho em progresso
-
-Happ is coming soon =)
-
+# Happ
 ![Alt text](./icon.svg)
-<img src="./icon.svg">
+
+### :construction: Trabalho em progresso
+Happ is coming soon =)
