@@ -60,41 +60,52 @@ aws_secret_access_key=XXXXXXXXXX
 region=us-east-1
 ```
 
+### Terraform State
+
+Para o controle do Terraform State foi utilizado o módulo [terraform-aws-tfstate-backend](https://github.com/cloudposse/terraform-aws-tfstate-backend), o qual cria o Bucket S3 encriptado para o armazenamento do Terraform State e cria também uma tabela no DynamoDB para gerenciar o Lock do state, a fim de evitar inconsistências e conflitos.
+
+Após executar o apply, o módulo gera o arquivo **`backend.tf`** com as especificações de gerenciamento de estado da infra. O ambiente e nome do bucket são criados de forma dinâmica, a partir do ambiente que está sendo executado.
+
+Além do controle de estado, a ideia do uso deste módulo é abstrair a necessidade de especificação de um arquivo de configuração de backend de forma manual.
+
 ### Executando
 
-Para executar, utilize o script `happ.sh`. O script foi adicionado para automatizar o controle do `terraform.state`, realizando o download e o upload para o S3, mantendo o estado atual da infra gerenciado.
+Setando o workspace:
 
-Os parâmetros esperados pelo script são:
-
-- `$1`: Operação [apply, plan, destroy, show]
-- `$2`: Ambiente [dev, prod]
-- `$3`: Opções extras do Terraform. Examplo: -auto-approve
-
-#### Examplos
-
-Exibindo estado atual da infra:
 ```bash
-./happ.sh show dev
+terraform workspace new dev
 ```
 
-Planejando as alterações a serem aplicadas:
+Inicializando os módulos:
+
 ```bash
-./happ.sh plan dev
+terraform init
 ```
 
-Aplicando as alterações na infra:
+Inicializando os módulos:
+
 ```bash
-./happ.sh apply dev
+terraform init
 ```
 
-Destruindo a infra atual:
+Validando os arquivos:
+
 ```bash
-./happ.sh destroy dev
+terraform validate
 ```
 
-Para scripts, é possível utilizar o comando abaixo para evitar uma confirmação como entrada:
+Planejando as alterações:
+
 ```bash
-./happ.sh apply dev -auto-approve
+terraform plan -var-file=values/[env].tfvars
+```
+
+Substitura o `[env]` pelo ambiente que irá aplicar as alterações. Exemplo: dev, prod
+
+Aplicando as alterações:
+
+```bash
+terraform apply -var-file=values/[env].tfvars
 ```
 
 ## Arquitetura
