@@ -1,5 +1,8 @@
-# Happ
-![Alt text](./icon.png)
+<h1> <img src="./icon.svg">
+  width="128"
+  height="128"
+  style="float:left;">
+    Happ
 
-### :construction: Trabalho em progresso
+# :construction: Trabalho em progresso
 Happ is coming soon =)
