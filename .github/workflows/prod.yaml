@@ -5,8 +5,8 @@ on:
       - prod
 
 jobs:
-  terraform:
-    name: 'Infra - Terraform'
+  infra:
+    name: 'Infra'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -39,3 +39,4 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -var-file="values/prod.tfvars" -auto-approve
       working-directory: ./infra
+    
