@@ -8,9 +8,9 @@ variable "app" {
   description = "Application name"
 }
 
-variable "bucket_name" {
+variable "namespace" {
   type        = string
-  description = "S3 bucket name responsible to manage terraform state. Defined by TF_VAR_bucket_name."
+  description = "Application namespace to specify context and avoid bucket name conflicts"
 }
 
 variable "aws_region" {

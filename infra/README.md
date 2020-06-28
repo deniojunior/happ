@@ -39,6 +39,10 @@ sudo apt-get install awscli
 
 Configure as suas credenciais da AWS:
 
+```bash
+aws configure
+```
+
 Caso prefira, também é possível configurar as credenciais criando o arquivo de credenciais de forma manual:
 
 Crie o diretório `.aws` no seu home e crie o arquivo `credentials` dentro:
@@ -60,41 +64,74 @@ aws_secret_access_key=XXXXXXXXXX
 region=us-east-1
 ```
 
+### Terraform State
+
+Para o controle do Terraform State foi utilizado o módulo [terraform-aws-tfstate-backend](https://github.com/cloudposse/terraform-aws-tfstate-backend), o qual cria o Bucket S3 encriptado para o armazenamento do Terraform State e cria também uma tabela no DynamoDB para gerenciar o Lock do state, a fim de evitar inconsistências e conflitos.
+
+Após executar o apply, o módulo gera o arquivo **`backend.tf`** com as especificações de gerenciamento de estado da infra. O ambiente e nome do bucket são criados de forma dinâmica, a partir do ambiente que está sendo executado.
+
+Além do controle de estado, a ideia do uso deste módulo é abstrair a necessidade de especificação de um arquivo de configuração de backend de forma manual.
+
+Para executar o projeto no ambiente local, você precisa apenas excluir o arquivo `backend.tf`:
+
+```bash
+rm -rf backend.tf
+```
+
+
+### Namespace
+
+Para evitar conflitos como nome de bucket, que deve ser único, adicionei a variável **`namespace`**, a qual é adicionada no padrão de nomeclatura dos componentes do projeto.
+
+O namespace **default** está definido nos arquivos de variáveis: `values/dev.tfvars` e `values/prod.tfvars`.
+
+Para criar os recuros com um outro namespace basta adicionar a seguinte opção na frente dos comandos de execução comando 
+
+```bash
+-var="namespace=hm"
+```
+
 ### Executando
 
-Para executar, utilize o script `happ.sh`. O script foi adicionado para automatizar o controle do `terraform.state`, realizando o download e o upload para o S3, mantendo o estado atual da infra gerenciado.
-
-Os parâmetros esperados pelo script são:
-
-- `$1`: Operação [apply, plan, destroy, show]
-- `$2`: Ambiente [dev, prod]
-- `$3`: Opções extras do Terraform. Examplo: -auto-approve
-
-#### Examplos
-
-Exibindo estado atual da infra:
+Removendo a configuração de state:
 ```bash
-./happ.sh show dev
+rm -rf backend.tf
 ```
 
-Planejando as alterações a serem aplicadas:
+Inicializando os módulos:
+
 ```bash
-./happ.sh plan dev
+terraform init
 ```
 
-Aplicando as alterações na infra:
+Setando o workspace:
+
 ```bash
-./happ.sh apply dev
+terraform workspace new dev
 ```
 
-Destruindo a infra atual:
+Validando a configuração:
+
 ```bash
-./happ.sh destroy dev
+terraform validate
 ```
 
-Para scripts, é possível utilizar o comando abaixo para evitar uma confirmação como entrada:
+Planejando as alterações:
+
 ```bash
-./happ.sh apply dev -auto-approve
+terraform plan -var-file=values/dev.tfvars -var="namespace=hm"
+```
+
+Aplicando as alterações:
+
+```bash
+terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
+```
+
+Destruindo a infra criada:
+
+```bash
+terraform destroy -var-file=values/dev.tfvars -var="namespace=hm"
 ```
 
 ## Arquitetura
