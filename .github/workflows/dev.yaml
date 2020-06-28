@@ -1,0 +1,31 @@
+on:
+    push:
+      branches:
+        - dev
+        - ft-ci-pipeline-10 #TODO: remove
+    pull_request:
+      branches:
+        - dev
+
+jobs:
+    terraform:
+        name: 'Terraform'
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'Checkout'
+                uses: actions/checkout@master
+            - name: Configure AWS Credentials
+                uses: aws-actions/configure-aws-credentials@v1
+                with:
+                    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+                    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+                    aws-region: us-east-1
+            - name: 'Terraform Format'
+                uses: hashicorp/terraform-github-actions@master
+                with:
+                    tf_actions_version: 0.12.28
+                    tf_actions_subcommand: 'init'
+                    tf_actions_working_dir: './infra/'
+                env:
+                    #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    TF_WORKSPACE: dev
