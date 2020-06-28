@@ -15,6 +15,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        terraform_version: 0.12.28
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -26,7 +28,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        terraform_version: 0.12.28
 
     - name: Terraform Init
       run: terraform init
@@ -41,7 +43,7 @@ jobs:
       run: terraform validate
 
     - name: Terraform Plan
-      run: terraform plan -var-file="values/dev.tfvars"
+      run: terraform plan -var-file="../../infra/values/dev.tfvars"
 
     - name: Terraform Apply
-      run: terraform apply -var-file="values/dev.tfvars" -auto-approve
+      run: terraform apply -var-file="../../infra/values/dev.tfvars" -auto-approve
