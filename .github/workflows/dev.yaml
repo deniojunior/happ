@@ -28,12 +28,9 @@ jobs:
       with:
         terraform_version: 0.12.28
 
-    - name: Terraform Setup Workspace
-      run: export TF_WORKSPACE="dev"
-      working-directory: ./infra
-      
     - name: Terraform Init
       run: terraform init
+      env: TF_WORKSPACE="dev"
       working-directory: ./infra
 
     - name: Terraform Validate
