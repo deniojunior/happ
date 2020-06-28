@@ -156,8 +156,15 @@ jobs:
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
+        package_version=$(cat package.json \
+          | grep version \
+          | head -1 \
+          | awk -F: '{ print $2 }' \
+          | sed 's/[",]//g' \
+          | tr -d '[[:space:]]')
+
         if [ $(aws s3 ls s3://happ-deniojunior-dev-frontend/latest | wc -l) <> 0 ]; then
-          aws s3 mv s3://$frontend_bucket/latest s3://$frontend_bucket/${{ github.sha }} --recursive
+          aws s3 mv s3://$frontend_bucket/latest s3://$frontend_bucket/$package_version --recursive
         fi
         
         aws s3 sync ./build s3://$frontend_bucket/latest
