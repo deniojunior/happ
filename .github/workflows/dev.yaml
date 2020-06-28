@@ -28,7 +28,7 @@ jobs:
         terraform_version: 0.12.28
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -backend-config=envs/dev.backend.tf
       working-directory: ./infra
       env: 
         TF_WORKSPACE: "dev"

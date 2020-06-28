@@ -6,6 +6,7 @@ module "terraform_state_backend" {
   source                             = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=master"
   namespace                          = "${var.app}-${var.namespace}"
   name                               = "terraform"
+  environment                        = var.env
   attributes                         = ["state"]
   region                             = "us-east-1"
   terraform_backend_config_file_path = "."
