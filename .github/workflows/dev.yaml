@@ -46,7 +46,7 @@ jobs:
 
     - name: Terraform Outputs
       run: |
-        export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
 
         echo "export ecr_repository=$(terraform output ecr_repository)" >> terraform.outputs
         echo "ecr_repository_url=$(terraform output ecr_repository_url)" >> terraform.outputs
