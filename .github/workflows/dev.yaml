@@ -208,6 +208,9 @@ jobs:
         export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
         
         echo "$(terraform state list | grep -vE module.terraform_state_backend*)" > resources_to_destroy
+        sed -i '/\[command\]/d' resources_to_destroy
+        sed -i '/::/d' resources_to_destroy
+
         aws s3 cp resources_to_destroy s3://$S3_BUCKET
 
         echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
