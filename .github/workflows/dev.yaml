@@ -101,17 +101,16 @@ jobs:
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
-        echo "${ecr_repository}"
-        echo "${ecr_repository_url}"
+        app_version=$(config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
         
         docker build -t $ecr_repository .
-        docker build -t $ecr_repository:${{ github.sha }} .
+        docker build -t $ecr_repository:$app_version .
         
         docker tag $ecr_repository:latest $ecr_repository_url:latest
         docker push $ecr_repository_url:latest
         
-        docker tag $ecr_repository:${{ github.sha }} $ecr_repository_url:${{ github.sha }}
-        docker push $ecr_repository_url:${{ github.sha }}
+        docker tag $ecr_repository:$app_version $ecr_repository_url:$app_version
+        docker push $ecr_repository_url:$app_version
       working-directory: ./backend/
 
   frontend:
@@ -163,10 +162,7 @@ jobs:
           | sed 's/[",]//g' \
           | tr -d '[[:space:]]')
 
-        if [ $(aws s3 ls s3://happ-deniojunior-dev-frontend/latest | wc -l) <> 0 ]; then
-          aws s3 mv s3://$frontend_bucket/latest s3://$frontend_bucket/$package_version --recursive
-        fi
-        
+        aws s3 sync ./build  s3://$frontend_bucket/$package_version --recursive
         aws s3 sync ./build s3://$frontend_bucket/latest
       working-directory: ./frontend/
   
