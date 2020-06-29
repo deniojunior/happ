@@ -175,7 +175,7 @@ jobs:
       run: sleep 5s #TODO: fix time
   
   infra-destroy:
-   needs: [uptime]
+    needs: [uptime]
     name: 'Destroy infra - Terraform'
     runs-on: ubuntu-latest
     steps:
