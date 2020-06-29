@@ -52,11 +52,13 @@ module "s3_bucket" {
 POLICY
 }
 
-resource "aws_ecr_repository" "ecr_repository" {
-  name                 = local.resource
-  image_tag_mutability = "MUTABLE"
+data "aws_iam_role" "ecr" {
+  name = "ecr"
+}
 
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+module "ecr" {
+  source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+  name                   = local.resource
+  principals_full_access = [data.aws_iam_role.ecr.arn]
+  max_image_count        = 5
 }
