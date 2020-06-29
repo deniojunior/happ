@@ -198,6 +198,21 @@ jobs:
       run: terraform validate
       working-directory: ./infra
 
+    - name: Terraform Plan
+      run: terraform plan -destroy
+      working-directory: ./infra
+
+    # Destroy all resources but terraform state module
     - name: Terraform Destroy
-      run: terraform destroy -var-file="values/prod.tfvars" -auto-approve
+      run: |
+        terraform state list | grep -vE module.terraform_state_backend* > resources_to_destroy
+        echo 'terraform destroy -auto-approve -var-file="values/prod.tfvars" \' > destroy_script.sh
+        
+        while read resource; do
+          echo "-target=$resource \\" >> destroy_script.sh
+        done < resources_to_destroy
+        
+        sed -i '$ s/.$//' destroy_script.sh
+
+        bash destroy_script.sh;
       working-directory: ./infra
