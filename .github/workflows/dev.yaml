@@ -205,7 +205,7 @@ jobs:
     # Destroy all resources but terraform state module
     - name: Terraform Destroy
       run: |
-        terraform state list | grep -oP "(?<=::set-output name=stdout::).*")\" | grep -vE module.terraform_state_backend* > resources_to_destroy
+        terraform state list | grep -oP "(?<=::set-output name=stdout::).*" | grep -vE module.terraform_state_backend* > resources_to_destroy
         echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
         
         while read resource; do
