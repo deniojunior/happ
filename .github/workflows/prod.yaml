@@ -167,7 +167,7 @@ jobs:
     name: 'Uptime 30 min'
     runs-on: ubuntu-latest
     steps:
-    - name: Install dependencies
+    - name: Uptime 30 min
       run: sleep 30m
   
   infra-destroy:

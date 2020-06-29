@@ -168,10 +168,10 @@ jobs:
 
   uptime:
     needs: [frontend, backend]
-    name: 'Uptime 1 min'
+    name: 'Uptime 30 min'
     runs-on: ubuntu-latest
     steps:
-    - name: Install dependencies
+    - name: sleep 30m
       run: sleep 1m
   
   infra-destroy:
