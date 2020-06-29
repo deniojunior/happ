@@ -15,12 +15,22 @@ module "terraform_state_backend" {
   prevent_unencrypted_uploads        = false
 }
 
-data "local_file" "iam_role_json" {
-  filename = "./resources/iam_role.json"
-}
-
 resource "aws_iam_role" "this" {
-  assume_role_policy = data.local_file.iam_role_json.content
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
 }
 
 data "aws_iam_policy_document" "bucket_policy" {
