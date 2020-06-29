@@ -101,7 +101,7 @@ jobs:
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
-        export app_version=$(config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
+        export app_version=$(cat config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
         
         docker build -t $ecr_repository .
         docker build -t $ecr_repository:$app_version .
