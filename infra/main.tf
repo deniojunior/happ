@@ -11,7 +11,8 @@ module "terraform_state_backend" {
   region                             = "us-east-1"
   terraform_backend_config_file_path = "."
   terraform_backend_config_file_name = "backend.tf"
-  force_destroy                      = false
+  force_destroy                      = true
+  prevent_unencrypted_uploads        = false
 }
 
 module "s3_bucket" {
@@ -31,7 +32,8 @@ module "s3_bucket" {
     Name        = "${local.resource}-frontend"
   }
 
-  policy = <<POLICY
+  attach_policy = true
+  policy        = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -43,7 +45,7 @@ module "s3_bucket" {
         "s3:GetObject"
       ],
       "Resource": [
-        "arn:aws:s3:::example-bucket/*"
+        "arn:aws:s3:::${local.resource}-frontend/*"
       ]
     }
   ]
@@ -51,11 +53,8 @@ module "s3_bucket" {
 POLICY
 }
 
-resource "aws_ecr_repository" "ecr_registry" {
-  name                 = local.resource
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+module "ecr" {
+  source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
+  name                   = local.resource
+  max_image_count        = 5
 }

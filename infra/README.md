@@ -104,12 +104,6 @@ Inicializando os módulos:
 terraform init
 ```
 
-Setando o workspace:
-
-```bash
-terraform workspace new dev
-```
-
 Validando a configuração:
 
 ```bash
