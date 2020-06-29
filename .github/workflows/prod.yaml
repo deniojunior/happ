@@ -198,10 +198,6 @@ jobs:
       run: terraform validate
       working-directory: ./infra
 
-    - name: Terraform Plan
-      run: terraform plan -destroy
-      working-directory: ./infra
-
     # Destroy all resources but terraform state module
     - name: Terraform Destroy
       run: |

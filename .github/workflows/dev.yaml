@@ -202,12 +202,8 @@ jobs:
       run: terraform validate
       working-directory: ./infra
 
-    - name: Terraform Plan
-      run: terraform plan -destroy
-      working-directory: ./infra
-
     # Destroy all resources but terraform state module
-    - name: Terraform Destroy
+    - name: Terraform Destroy - all resources but terraform state module
       run: |
         terraform state list | grep -vE module.terraform_state_backend* > resources_to_destroy
         echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh

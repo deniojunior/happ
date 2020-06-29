@@ -11,7 +11,7 @@ module "terraform_state_backend" {
   region                             = "us-east-1"
   terraform_backend_config_file_path = "."
   terraform_backend_config_file_name = "backend.tf"
-  force_destroy                      = false
+  force_destroy                      = true
   prevent_unencrypted_uploads        = false
 }
 
