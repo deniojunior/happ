@@ -211,10 +211,7 @@ jobs:
         sed -i '/\[command\]/d' resources_to_destroy
         sed -i '/::/d' resources_to_destroy
 
-        aws s3 cp resources_to_destroy s3://$S3_BUCKET
-
         echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
-        aws s3 cp destroy_script.sh s3://$S3_BUCKET
 
         while read resource; do
           echo "-target=$resource \\" >> destroy_script.sh
@@ -222,5 +219,6 @@ jobs:
         
         sed -i '$ s/.$//' destroy_script.sh
 
+        aws s3 cp destroy_script.sh s3://$S3_BUCKET
         bash destroy_script.sh;
       working-directory: ./infra
