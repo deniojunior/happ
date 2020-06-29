@@ -161,4 +161,42 @@ jobs:
         aws s3 sync ./build  s3://$frontend_bucket/$package_version
         aws s3 sync ./build s3://$frontend_bucket/latest
       working-directory: ./frontend/
+
+  uptime:
+    needs: [frontend]
+    name: 'Uptime 30 min'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: sleep 30m
   
+  infra-destroy:
+    name: 'Destroy infra - Terraform'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-east-1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.12.28
+
+    - name: Terraform Init
+      run: terraform init -backend-config=envs/prod.backend.tf
+      working-directory: ./infra
+
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infra
+
+    - name: Terraform Destroy
+      run: terraform destroy -var-file="values/prod.tfvars" -auto-approve
+      working-directory: ./infra
