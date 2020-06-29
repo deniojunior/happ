@@ -35,13 +35,8 @@ module "s3_bucket" {
   policy = file("./resources/frontend_bucket_policy.json")
 }
 
-data "aws_iam_role" "ecr" {
-  name = "ecr"
-}
-
 module "ecr" {
   source                 = "git::https://github.com/cloudposse/terraform-aws-ecr.git?ref=master"
   name                   = local.resource
-  principals_full_access = [data.aws_iam_role.ecr.arn]
   max_image_count        = 5
 }
