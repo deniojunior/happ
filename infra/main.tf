@@ -15,8 +15,12 @@ module "terraform_state_backend" {
   prevent_unencrypted_uploads        = false
 }
 
+data "local_file" "iam_role_json" {
+  filename = "./resources/iam_role.json"
+}
+
 resource "aws_iam_role" "this" {
-  assume_role_policy = file("./resources/iam_role.json")
+  assume_role_policy = data.local_file.iam_role_json.content
 }
 
 data "aws_iam_policy_document" "bucket_policy" {
