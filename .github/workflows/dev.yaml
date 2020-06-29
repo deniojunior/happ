@@ -214,7 +214,7 @@ jobs:
         echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
 
         while read resource; do
-          echo "-target=$resource \\" >> destroy_script.sh
+          echo "-target=\"$resource\" \\" >> destroy_script.sh
         done < resources_to_destroy
         
         sed -i '$ s/.$//' destroy_script.sh
