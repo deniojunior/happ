@@ -46,7 +46,7 @@ jobs:
         
         OUTPUTS=("ecr_repository" "ecr_repository_url" "frontend_bucket")
         for output in "${OUTPUTS[@]}"; do 
-          echo "export $output=\"$(terraform output $output| grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
+          echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
         done
         
         sed -i -e 's/%0A//g' terraform.outputs
