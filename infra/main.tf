@@ -32,24 +32,7 @@ module "s3_bucket" {
     Name        = "${local.resource}-frontend"
   }
 
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "AllowPublicReadAccess",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "s3:GetObject"
-      ],
-      "Resource": [
-        "arn:aws:s3:::example-bucket/*"
-      ]
-    }
-  ]
-}
-POLICY
+  policy = file("./resources/frontend_bucket_policy.json")
 }
 
 data "aws_iam_role" "ecr" {
