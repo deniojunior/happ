@@ -23,7 +23,7 @@ module "s3_bucket" {
   force_destroy = true
 
   website = {
-    index_document = "index.html"
+    index_document = "latest/index.html"
   }
 
   tags = {
