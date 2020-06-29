@@ -201,14 +201,16 @@ jobs:
     # Destroy all resources but terraform state module
     - name: Terraform Destroy
       run: |
-        terraform state list | grep -vE module.terraform_state_backend* > resources_to_destroy
+        echo "$(terraform state list | grep -vE module.terraform_state_backend*)" > resources_to_destroy
+        sed -i '/\[command\]/d' resources_to_destroy
+        sed -i '/::/d' resources_to_destroy
+
         echo 'terraform destroy -auto-approve -var-file="values/prod.tfvars" \' > destroy_script.sh
-        
+
         while read resource; do
-          echo "-target=$resource \\" >> destroy_script.sh
+          echo "-target='$resource' \\" >> destroy_script.sh
         done < resources_to_destroy
         
         sed -i '$ s/.$//' destroy_script.sh
-
         bash destroy_script.sh;
       working-directory: ./infra
