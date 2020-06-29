@@ -114,7 +114,7 @@ jobs:
       working-directory: ./backend/
 
   frontend:
-    needs: [backend]
+    needs: [infra]
     name: 'Frontend - React/Node'
     runs-on: ubuntu-latest
     strategy:
@@ -167,7 +167,7 @@ jobs:
       working-directory: ./frontend/
 
   uptime:
-    needs: [frontend]
+    needs: [frontend, backend]
     name: 'Uptime 1 min'
     runs-on: ubuntu-latest
     steps:
@@ -175,6 +175,7 @@ jobs:
       run: sleep 1m
   
   infra-destroy:
+    needs: [uptime]
     name: 'Destroy infra - Terraform'
     runs-on: ubuntu-latest
     steps:
