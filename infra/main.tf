@@ -15,6 +15,23 @@ module "terraform_state_backend" {
   prevent_unencrypted_uploads        = false
 }
 
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = [aws_iam_role.this.arn]
+    }
+
+    actions = [
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}",
+    ]
+  }
+}
+
 module "s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
@@ -32,7 +49,8 @@ module "s3_bucket" {
     Name        = "${local.resource}-frontend"
   }
 
-  policy = file("./resources/frontend_bucket_policy.json")
+  attach_policy = true
+  policy        = data.aws_iam_policy_document.bucket_policy.json
 }
 
 module "ecr" {
