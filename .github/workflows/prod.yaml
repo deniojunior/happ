@@ -168,11 +168,11 @@ jobs:
 
   uptime:
     needs: [frontend, backend]
-    name: 'Uptime 30 min'
+    name: 'Uptime ${{ secrets.INFRA_UPTIME_PROD }}'
     runs-on: ubuntu-latest
     steps:
-    - name: Uptime 30 min
-      run: sleep 30m
+    - name: Sleep ${{ secrets.INFRA_UPTIME_PROD }}
+      run: sleep ${{ secrets.INFRA_UPTIME_PROD }}
   
   infra-destroy:
     needs: [uptime]
