@@ -87,6 +87,10 @@ module "cloufront_multiorigin" {
   route53_zone                = var.aws_route53_zone
   route53_zone_id             = data.aws_route53_zone.selected.id
 
+  module_depends_on = [
+    module.acm
+  ]
+
   resource = local.resource
   tags     = local.tags
 }
