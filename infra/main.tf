@@ -94,7 +94,7 @@ module "cloufront_multiorigin" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc"
+  name = "${local.resource}-vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["${var.aws_region}a", "${var.aws_region}b"]
