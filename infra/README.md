@@ -120,14 +120,25 @@ terraform validate
 Para os passos a seguir, inclua a zona do Route 53 que você irá utilizar. Para isso, basta substituir o `[route_53_zone]` pela sua zona. O valor default está no arquivo `tfvars`, no entanto você deverá utilizar um outro =)
 
 ```bash
-terraform plan -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+terraform plan -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
 #### Aplicando as alterações
 
 ```bash
-terraform apply -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
+
+A aplicação estará disponível em `https://happ.[route_53_zone]`;
+
+Exemplo:
+
+```bash
+terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=devsforlife.org"
+```
+
+- **Frontend:** https://happ.devsforlife.org/frontend
+- **Backend:** https://happ.devsforlife.org/backend
 
 #### Destruindo a infra criada
 
@@ -138,7 +149,7 @@ Conforme issues https://github.com/terraform-providers/terraform-provider-aws/is
 Dessa forma, sugiro rodar o script criado para deletar a infraestrutura, pois ele irá deletar todos os recursos, exceto o Lambda@Edge, o qual poderá ser deletado posteriormente de forma manual algumas horas depois.
 
 ```bash
-bash scripts/destroy.sh -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+bash scripts/destroy.sh -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
 
