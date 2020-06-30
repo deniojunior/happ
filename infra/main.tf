@@ -132,7 +132,7 @@ module "eks" {
   cluster_name    = "${local.resource}-eks"
   cluster_version = "1.16"
   subnets         = module.vpc.private_subnets
-  vpc_id          = module.vpc.default_vpc_id
+  vpc_id          = module.vpc.vpc_id
 
   worker_groups = [
     {
