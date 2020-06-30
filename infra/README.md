@@ -93,42 +93,54 @@ Para criar os recuros com um outro namespace basta adicionar a seguinte opção 
 
 ### Executando
 
-Removendo a configuração de state:
+Segue abaixo uma lista de comandos para você criar o projeto em uma outra conta AWS.
+
+#### Removendo a configuração de state
+
+Remova a configuração de state que está linkada à infra do projeto. Não se preocupe, o projeto irá criar os recursos necessários para gerenciar o state e gerar um novo arquivo `backend.tf` para você
+
 ```bash
 rm -rf backend.tf
 ```
 
-Inicializando os módulos:
+#### Inicializando os módulos
 
 ```bash
 terraform init
 ```
 
-Validando a configuração:
+#### Validando a configuração
 
 ```bash
 terraform validate
 ```
 
-Para os passos a seguir, inclua a zona do Route 53 que você irá utilizar. Para isso, basta substituir o `[route_53_zone]` pela sua zona. O valor default está no arquivo `tfvars`, no entanto você deverá utilizar um outro =)
+#### Planejando as alterações
 
-Planejando as alterações:
+Para os passos a seguir, inclua a zona do Route 53 que você irá utilizar. Para isso, basta substituir o `[route_53_zone]` pela sua zona. O valor default está no arquivo `tfvars`, no entanto você deverá utilizar um outro =)
 
 ```bash
 terraform plan -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
-Aplicando as alterações:
+#### Aplicando as alterações
 
 ```bash
 terraform apply -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
-Destruindo a infra criada:
+#### Destruindo a infra criada
+
+Conforme issues https://github.com/terraform-providers/terraform-provider-aws/issues/1721 e https://github.com/terraform-providers/terraform-provider-aws/issues/5818, existe um bug atual ao deletar Lambda@Edge functions. A [documentação da aws](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-delete-replicas.html) diz que só é possível realizar a exclusão após uma desassociação do Lambda@Edge com o Cloudfront e esperar alguamas horas:
+
+> If you remove all the associations for a Lambda function version, you can typically delete the function version a few hours later.
+
+Dessa forma, sugiro rodar o script criado para deletar a infraestrutura, pois ele irá deletar todos os recursos, exceto o Lambda@Edge, o qual poderá ser deletado posteriormente de forma manual algumas horas depois.
 
 ```bash
-terraform destroy -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+bash scripts/destroy.sh -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
+
 
 ## Arquitetura
 
