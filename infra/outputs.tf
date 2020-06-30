@@ -1,4 +1,4 @@
- output "ecr_repository" {
+output "ecr_repository" {
   value       = module.ecr.repository_name
   description = "ECR repository name"
 }

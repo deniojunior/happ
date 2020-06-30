@@ -21,5 +21,5 @@ variable "aws_region" {
 
 variable "aws_route53_zone" {
   type        = string
-  description = "AWS region where the infrastructure is located"
+  description = "Route 53 zone name"
 }

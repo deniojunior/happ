@@ -158,7 +158,7 @@ jobs:
           | sed 's/[",]//g' \
           | tr -d '[[:space:]]')
 
-        aws s3 sync ./build  s3://$frontend_bucket/versions/$package_version
+        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
         aws s3 sync ./build s3://$frontend_bucket
       working-directory: ./frontend/
 
