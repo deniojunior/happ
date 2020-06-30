@@ -205,7 +205,7 @@ jobs:
     # Destroy all resources but terraform state module
     - name: Terraform Destroy
       run: |
-        echo "$(terraform state list | grep -vE \"module.terraform_state_backend*|*lambda_edge*\")" > resources_to_destroy
+        echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge*)" > resources_to_destroy
         sed -i '/\[command\]/d' resources_to_destroy
         sed -i '/::/d' resources_to_destroy
 
