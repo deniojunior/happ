@@ -155,8 +155,7 @@ module "alb" {
   http_enabled                      = true
   cross_zone_load_balancing_enabled = true
   ip_address_type                   = "ipv4"
-  target_group_port                 = 443
-  target_group_protocol             = "HTTPS"
+  target_group_port                 = 80
   target_group_target_type          = "ip"
   access_logs_enabled               = false
   health_check_path                 = var.app_health_check_path
