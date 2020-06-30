@@ -149,7 +149,7 @@ module "alb" {
   name                              = local.resource
   vpc_id                            = module.vpc.vpc_id
   security_group_ids                = [module.vpc.default_security_group_id]
-  subnet_ids                        = module.subnets.public_subnet_ids
+  subnet_ids                        = module.vpc.public_subnets
   http_enabled                      = true
   cross_zone_load_balancing_enabled = true
   ip_address_type                   = "ipv4"
@@ -169,5 +169,5 @@ module "alb_ingress" {
   unauthenticated_listener_arns       = [module.alb.http_listener_arn]
   unauthenticated_listener_arns_count = 1
 
-  tags                              = merge(local.tags, { Name = "${local.resource}-alb-ingress" })
+  tags = merge(local.tags, { Name = "${local.resource}-alb-ingress" })
 }

@@ -53,3 +53,9 @@ variable "eks_node_asg_max_size" {
   description = "Max auto scaling group size for EKS cluster nodes"
   default     = 1
 }
+
+variable "app_health_check_path" {
+  type        = number
+  description = "App health check endpoint"
+  default     = "/healthz"
+}
