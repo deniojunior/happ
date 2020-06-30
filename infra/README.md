@@ -110,22 +110,24 @@ Validando a configuração:
 terraform validate
 ```
 
+Para os passos a seguir, inclua a zona do Route 53 que você irá utilizar. Para isso, basta substituir o `[route_53_zone]` pela sua zona. O valor default está no arquivo `tfvars`, no entanto você deverá utilizar um outro =)
+
 Planejando as alterações:
 
 ```bash
-terraform plan -var-file=values/dev.tfvars -var="namespace=hm"
+terraform plan -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
 Aplicando as alterações:
 
 ```bash
-terraform apply -var-file=values/dev.tfvars -var="namespace=hm"
+terraform apply -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
 Destruindo a infra criada:
 
 ```bash
-terraform destroy -var-file=values/dev.tfvars -var="namespace=hm"
+terraform destroy -var-file=values/dev.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
 ## Arquitetura

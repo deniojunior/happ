@@ -62,4 +62,3 @@ variable "lambda_edge_runtime" {
   description = "Lambda Edge function runtime"
   default     = "nodejs12.x"
 }
- 
