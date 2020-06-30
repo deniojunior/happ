@@ -18,3 +18,8 @@ variable "aws_region" {
   description = "AWS region where the infrastructure is located"
   default     = "us-east-1"
 }
+
+variable "aws_route53_zone" {
+  type        = string
+  description = "AWS region where the infrastructure is located"
+}
