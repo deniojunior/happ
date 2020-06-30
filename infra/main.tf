@@ -89,7 +89,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   aliases = ["happ.devsforlife.org"]
 
   default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = module.s3_bucket.this_s3_bucket_id
 
@@ -105,10 +105,11 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
+    compress               = true
   }
 
   ordered_cache_behavior {
-    path_pattern     = "/frontend/*"
+    path_pattern     = "/latest/frontend/index.html"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = module.s3_bucket.this_s3_bucket_id
@@ -122,10 +123,10 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     }
 
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
     compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
   }
 
   restrictions {
