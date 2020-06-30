@@ -122,7 +122,7 @@ resource "aws_iam_role" "lambda_edge_role" {
 EOF
 }
 
-resource "aws_iam_policy" "lambda_edge-policy" {
+resource "aws_iam_policy" "lambda_edge_policy" {
   name = "${var.resource}-lambda-edge-iam-policy"
 
   policy =  <<EOF
@@ -143,8 +143,8 @@ resource "aws_iam_policy" "lambda_edge-policy" {
 EOF
 }
 
-resource "aws_iam_policy_attachment" "lambda_edge-policy_attachment" {
+resource "aws_iam_policy_attachment" "lambda_edge_policy_attachment" {
   name       = "${var.resource}-attachment"
   roles      = [aws_iam_role.lambda_edge_role.name]
-  policy_arn = aws_iam_policy.policy.arn
+  policy_arn = aws_iam_policy.lambda_edge_policy.arn
 }

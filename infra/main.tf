@@ -79,7 +79,7 @@ module "cloufront_multiorigin" {
 
   lamba_edge_payload_filename = "./modules/cloudfront_multiorigin/resources/lambda_edge_payload.zip"
   lamba_edge_handler          = "lambda_edge_function.handler"
-  
+
   bucket_regional_domain_name = module.s3_bucket.this_s3_bucket_bucket_regional_domain_name
   s3_bucket_id                = module.s3_bucket.this_s3_bucket_id
   app_subdomain               = local.app_subdomain
