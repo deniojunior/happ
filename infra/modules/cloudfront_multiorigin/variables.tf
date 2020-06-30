@@ -62,3 +62,9 @@ variable "lambda_edge_runtime" {
   description = "Lambda Edge function runtime"
   default     = "nodejs12.x"
 }
+
+variable "module_depends_on" {
+  type        = list
+  description = "Resources that this module depends on"
+  default     = []
+}
