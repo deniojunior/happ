@@ -54,7 +54,7 @@ variable "lamba_edge_payload_filename" {
 variable "lamba_edge_handler" {
   type        = string
   description = "Lambda Edge handler function"
-  default     = "lambda_edge_function.js"
+  default     = "lambda_edge_function.handler"
 }
 
 variable "lambda_edge_runtime" {

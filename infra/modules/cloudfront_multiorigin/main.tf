@@ -102,7 +102,7 @@ resource "aws_lambda_function" "lambda_edge" {
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
-  name = "${var.resource}-iam-role"
+  name = "${var.resource}-lambda-edge-iam-role"
 
   tags = merge(var.tags, {Name = "${var.resource}-lambda-role"})
 
@@ -120,4 +120,31 @@ resource "aws_iam_role" "lambda_edge_role" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_policy" "policy" {
+  name = "${var.resource}-lambda-edge-iam-policy"
+
+  policy =  <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        }
+  ]
+} 
+EOF
+}
+
+resource "aws_iam_policy_attachment" "policy_attachment" {
+  name       = "attachment"
+  roles      = [aws_iam_role.lambda_edge_role.name]
+  policy_arn = aws_iam_policy.policy.arn
 }
