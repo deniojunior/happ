@@ -55,7 +55,7 @@ variable "eks_node_asg_max_size" {
 }
 
 variable "app_health_check_path" {
-  type        = number
+  type        = string
   description = "App health check endpoint"
   default     = "/healthz"
 }
