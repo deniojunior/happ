@@ -1,6 +1,6 @@
 locals {
-  resource      = "${var.app}-${var.namespace}-${var.env}"
-  app_subdomain = var.env == "prod" ? "${var.app}" : "${var.app}-${var.env}"
+  resource = "${var.app}-${var.namespace}-${var.env}"
+  app_name = var.env == "prod" ? "${var.app}" : "${var.app}-${var.env}"
   tags = {
     Application = var.app
     Environment = var.env
@@ -82,7 +82,7 @@ module "cloufront_multiorigin" {
 
   bucket_regional_domain_name = module.s3_bucket.this_s3_bucket_bucket_regional_domain_name
   s3_bucket_id                = module.s3_bucket.this_s3_bucket_id
-  app_subdomain               = local.app_subdomain
+  app_subdomain               = local.app_name
   acm_certificate_arn         = module.acm.this_acm_certificate_arn
   route53_zone                = var.aws_route53_zone
   route53_zone_id             = data.aws_route53_zone.selected.id
@@ -140,4 +140,34 @@ module "eks" {
       asg_max_size  = var.eks_node_asg_max_size
     }
   ]
+
+  tags = merge(local.tags, { Name = "${local.resource}-eks" })
+}
+
+module "alb" {
+  source                            = "git::https://github.com/cloudposse/terraform-aws-alb.git?ref=tags/0.7.0"
+  name                              = local.resource
+  vpc_id                            = module.vpc.vpc_id
+  security_group_ids                = [module.vpc.default_security_group_id]
+  subnet_ids                        = module.subnets.public_subnet_ids
+  http_enabled                      = true
+  cross_zone_load_balancing_enabled = true
+  ip_address_type                   = "ipv4"
+  target_group_port                 = 80
+  target_group_target_type          = "ip"
+  health_check_path                 = var.app_health_check_path
+  tags                              = merge(local.tags, { Name = "${local.resource}-alb" })
+}
+
+
+module "alb_ingress" {
+  source                              = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=master"
+  name                                = local.resource
+  vpc_id                              = module.vpc.vpc_id
+  default_target_group_enabled        = false
+  target_group_arn                    = module.alb.default_target_group_arn
+  unauthenticated_listener_arns       = [module.alb.http_listener_arn]
+  unauthenticated_listener_arns_count = 1
+
+  tags                              = merge(local.tags, { Name = "${local.resource}-alb-ingress" })
 }

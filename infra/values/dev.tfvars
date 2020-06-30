@@ -11,3 +11,5 @@ vpc_public_subnets = ["10.0.2.0/24", "10.0.3.0/24"]
 
 eks_node_instance_type = "t3.small"
 eks_node_asg_max_size = 1
+
+app_health_check_path = "/healthz
