@@ -1,4 +1,4 @@
-name: 'Prod Workflow'
+name: 'prod'
 on:
   push:
     branches:
@@ -23,6 +23,10 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 0.12.28
+
+    - name: Zip Lambda Edge Payload
+      run: zip -r lambda_edge_payload.zip lambda_edge_function.js
+      working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
     - name: Terraform Init
       run: terraform init -backend-config=envs/prod.backend.tf
@@ -158,8 +162,8 @@ jobs:
           | sed 's/[",]//g' \
           | tr -d '[[:space:]]')
 
-        aws s3 sync ./build  s3://$frontend_bucket/$package_version
-        aws s3 sync ./build s3://$frontend_bucket/latest
+        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
+        aws s3 sync ./build s3://$frontend_bucket
       working-directory: ./frontend/
 
   uptime:
