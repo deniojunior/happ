@@ -28,14 +28,15 @@ variable "s3_bucket_id" {
   description = "S3 Bucket origin identifier"
 }
 
+variable "acm_certificate_arn" {
+  type        = string
+  description = "ACM Certificate ARN"
+}
+
 variable "app_subdomain" {
   type        = string
   description = "Application subdomain"
-}
-
-variable "frontend_context" {
-  type        = string
-  description = "Frontend context"
+  default     = ""
 }
 
 variable "default_root_object" {
@@ -44,7 +45,21 @@ variable "default_root_object" {
   default     = "index.html"
 }
 
-variable "acm_certificate_arn" {
+variable "lamba_edge_payload_filename" {
   type        = string
-  description = "ACM Certificate ARN"
+  description = "Lambda Edge payload file path"
+  default     = "./resources/lambda_edge_payload.zip"
 }
+
+variable "lamba_edge_handler" {
+  type        = string
+  description = "Lambda Edge handler function"
+  default     = "lambda_edge_function.js"
+}
+
+variable "lambda_edge_runtime" {
+  type        = string
+  description = "Lambda Edge function runtime"
+  default     = "nodejs12.x"
+}
+ 

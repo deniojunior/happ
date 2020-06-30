@@ -130,6 +130,6 @@ terraform destroy -var-file=values/dev.tfvars -var="namespace=hm"
 
 ## Arquitetura
 
-![Arquitetura HTMKT](https://user-images.githubusercontent.com/22299426/85886829-21ae6280-b7bd-11ea-907f-a4b165a80952.png)
+![Arquitetura HTMKT](https://user-images.githubusercontent.com/22299426/86080248-d91ad180-ba68-11ea-8496-641b8d917417.png)
 
 ![Arquitetura HTMKT - pt2](https://user-images.githubusercontent.com/22299426/85935889-cc14ab80-b8cb-11ea-8e87-93d0b5af54e5.png)

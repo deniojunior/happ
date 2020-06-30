@@ -30,7 +30,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   }
 
   ordered_cache_behavior {
-    path_pattern     = "${var.frontend_context}/*"
+    path_pattern     = "/frontend"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = var.s3_bucket_id
@@ -48,6 +48,12 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     max_ttl                = 86400
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
+
+    lambda_function_association {
+      event_type   = "origin-request"
+      lambda_arn   = aws_lambda_function.lambda_edge.qualified_arn
+      include_body = false
+    }
   }
 
   restrictions {
@@ -64,11 +70,10 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     ssl_support_method = "sni-only"
   }
 
-  # lambda_function_association {
-  #     event_type   = "origin-request"
-  #     lambda_arn   = "${aws_lambda_function.lambda_edge.qualified_arn}"
-  #     include_body = false
-  # }
+  depends_on = [
+    aws_lambda_function.lambda_edge
+  ]
+
 }
 
 resource "aws_route53_record" "cname" {
@@ -84,42 +89,35 @@ resource "aws_route53_record" "cname" {
   ]
 }
 
-# resource "aws_lambda_function" "default" {
-#   filename         = var.payload_filename
-#   function_name    = var.function_name
-#   role             = aws_iam_role.lambda_logging_role.arn
-#   handler          = var.handler
-#   runtime          = var.runtime
-#   memory_size      = var.memory_size
-#   timeout          = var.timeout
-#   description      = var.description
-#   tags             = merge(var.tags, {Name = "${var.resource}-lambda"})
-#   source_code_hash = filebase64sha256(var.payload_filename)
+resource "aws_lambda_function" "lambda_edge" {
+  filename         = var.lamba_edge_payload_filename
+  function_name    = "${var.resource}-lambda-edge"
+  role             = aws_iam_role.lambda_edge_role.arn
+  handler          = var.lamba_edge_handler
+  runtime          = var.lambda_edge_runtime
+  publish          = true
   
-#   environment {
-#     variables = var.environment_variables
-#   }
-# }
+  tags             = merge(var.tags, {Name = "${var.resource}-lambda-edge"})
+  source_code_hash = "filebase64sha256(${var.lamba_edge_payload_filename})"
+}
 
-# resource "aws_iam_role" "lambda_logging_role" {
-#   name = "${var.resource}-iam-role"
+resource "aws_iam_role" "lambda_edge_role" {
+  name = "${var.resource}-iam-role"
 
-#   tags = merge(var.tags, {Name = "${var.resource}-lambda-role"})
+  tags = merge(var.tags, {Name = "${var.resource}-lambda-role"})
 
-#   assume_role_policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Action": "sts:AssumeRole",
-#       "Principal": {
-#         "Service": "lambda.amazonaws.com"
-#       },
-#       "Effect": "Allow",
-#       "Sid": ""
-#     }
-#   ]
-# }
-# EOF
-
-# }
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": ["lambda.amazonaws.com", "edgelambda.amazonaws.com"]
+      },
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
