@@ -168,7 +168,7 @@ jobs:
 
   uptime:
     needs: [frontend, backend]
-    name: 'Uptime ${{ secrets.INFRA_UPTIME_PROD }}'
+    name: 'Application Uptime'
     runs-on: ubuntu-latest
     steps:
     - name: Sleep ${{ secrets.INFRA_UPTIME_PROD }}
