@@ -4,10 +4,10 @@
   style="float:left;"> 
 Happ
 
+![prod](https://github.com/deniojunior/happ/workflows/prod/badge.svg)
+
 ### 
 Happ é um projeto que provém uma infraestrutura completa para servir aplicações frontend e backend com alta disponibilidade, segurança, escalabilidade e tolerância a falhas.
-
-![prod](https://github.com/deniojunior/happ/workflows/prod/badge.svg)
 
 ![Arquitetura HTMKT](https://user-images.githubusercontent.com/22299426/86080248-d91ad180-ba68-11ea-8496-641b8d917417.png)
 ![Arquitetura HTMKT - pt2 (1)](https://user-images.githubusercontent.com/22299426/85948952-2c3a3a80-b92a-11ea-88f9-afeaec9c8ec7.png)

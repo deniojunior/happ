@@ -155,6 +155,7 @@ module "alb" {
   ip_address_type                   = "ipv4"
   target_group_port                 = 80
   target_group_target_type          = "ip"
+  access_logs_enabled               = false
   health_check_path                 = var.app_health_check_path
   tags                              = merge(local.tags, { Name = "${local.resource}-alb" })
 }
