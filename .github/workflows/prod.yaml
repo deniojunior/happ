@@ -109,7 +109,7 @@ jobs:
     - name: Terraform Outputs
       run: |
         export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs 
 
         OUTPUTS=("frontend_bucket")
         for output in "${OUTPUTS[@]}"; do 

@@ -135,6 +135,8 @@ Exemplo com zona:
 terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=devsforlife.org"
 ```
 
+:warning: **Atenção:**  Salve o valor do output `acm_certificate_arn`, ele será necessário nos próximos passos.
+
 #### Cloudfront Distribution
 
 A distribuição do cloudfront ficou em um módulo que deve ser executado depois da criação do módulo principal, pois o ALB é criado pelo Ingress Controller, o que torna inviável para o Terraform saber se o ALB está disponível ou não, resultando em erro na criação da distribution do Cloudfront.
@@ -151,17 +153,22 @@ Inicialize o terraform informando o arquivo de gerenciamento de estado criado an
 terraform init -backend-config=../../backend.tf
 ```
 
-Valide e planeje as alterações:
+Valide:
 
 ```bash
 terraform validate
-terraform plan -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+```
+
+Para planejar e aplicar as alterações será necessário incluir a variável `acm_certificate_arn`, que foi um output do primeiro módulo:
+
+```bash
+terraform plan -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]" -var="acm_certificate_arn=[acm_certificate_arn]"
 ```
 
 Aplique as alterações:
 
 ```bash
-terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]" -var="acm_certificate_arn=[acm_certificate_arn]"
 ```
 
 ### Validação

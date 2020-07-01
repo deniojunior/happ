@@ -102,7 +102,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
-    acm_certificate_arn            = module.acm.this_acm_certificate_arn
+    acm_certificate_arn            = var.acm_certificate_arn
     ssl_support_method             = "sni-only"
   }
 
@@ -217,25 +217,4 @@ module "s3_bucket" {
   ]
 }
 POLICY
-}
-
-module "acm" {
-  source  = "terraform-aws-modules/acm/aws"
-  version = "~> v2.0"
-
-  domain_name = var.aws_route53_zone
-  zone_id     = data.aws_route53_zone.selected.id
-
-  subject_alternative_names = [
-    "*.${var.aws_route53_zone}"
-  ]
-
-  tags = merge(local.tags, { Name = "${local.resource}-certificate" })
-}
-
-data "kubernetes_ingress" "ingress" {
-  metadata {
-    name      = "ingress"
-    namespace = "${var.app}-${var.env}"
-  }
 }

@@ -12,3 +12,8 @@ output "eks_cluster_name" {
   value       = module.eks.cluster_id
   description = "EKS cluster identifier/name"
 }
+
+output "acm_certificate_arn" {
+  value       = module.acm.this_acm_certificate_arn
+  description = "ACM certificace arn"
+}

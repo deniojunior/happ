@@ -102,3 +102,24 @@ module "alb_ingress_controller" {
 
   aws_tags = merge(local.tags, { Name = "${local.resource}-eks" })
 }
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> v2.0"
+
+  domain_name = var.aws_route53_zone
+  zone_id     = data.aws_route53_zone.selected.id
+
+  subject_alternative_names = [
+    "*.${var.aws_route53_zone}"
+  ]
+
+  tags = merge(local.tags, { Name = "${local.resource}-certificate" })
+}
+
+data "kubernetes_ingress" "ingress" {
+  metadata {
+    name      = "ingress"
+    namespace = "${var.app}-${var.env}"
+  }
+}

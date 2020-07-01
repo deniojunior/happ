@@ -23,3 +23,8 @@ variable "aws_route53_zone" {
   type        = string
   description = "Route 53 zone name"
 }
+
+variable "acm_certificate_arn" {
+  type        = string
+  description = "Route 53 zone name"
+}
