@@ -10,7 +10,7 @@ on:
 
 jobs:
   main-infra:
-    name: 'Main Infra - Terraform'
+    name: 'Infra - Main'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -58,6 +58,7 @@ jobs:
       working-directory: ./infra
     
   cf-infra:
+    needs: [main-infra]
     name: 'Infra - Cloudfront distribution'
     runs-on: ubuntu-latest
     steps:
@@ -81,12 +82,12 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
     - name: Terraform Init
-      run: terraform init -backend-config=envs/dev.backend.tf
+      run: terraform init -backend-config=../../envs/dev.backend.tf
       working-directory: ./infra
 
     - name: Terraform Workspace
       run: terraform workspace new cf-infra
-      working-directory: ./infra
+      working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Validate
       run: terraform validate
@@ -104,7 +105,7 @@ jobs:
       run: |
         export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        
+
         OUTPUTS=("frontend_bucket" "acm_certificate_arn")
         for output in "${OUTPUTS[@]}"; do 
           echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
