@@ -47,7 +47,7 @@ jobs:
       run: |
         export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
         
-        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name")
+        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "acm_certificate_arn")
         for output in "${OUTPUTS[@]}"; do 
           echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
         done
@@ -55,117 +55,6 @@ jobs:
         sed -i -e 's/%0A//g' terraform.outputs
         aws s3 cp terraform.outputs s3://$S3_BUCKET
       working-directory: ./infra
-    
-  cf-infra:
-    needs: [k8s]
-    name: 'Infra - Cloudfront distribution'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.12.28
-
-    - name: Zip Lambda@Edge Payload
-      run: zip -r lambda_edge_payload.zip lambda_edge_function.js
-      working-directory: ./infra/modules/cloudfront_multiorigin/resources
-
-    - name: Terraform Init
-      run: terraform init -backend-config=../../envs/dev.backend.tf
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Workspace
-      run: terraform workspace new cf-infra
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Plan
-      run: terraform plan -var-file="values/dev.tfvars"
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Apply
-      run: terraform apply -var-file="values/dev.tfvars" -auto-approve
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Outputs
-      run: |
-        export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-
-        OUTPUTS=("frontend_bucket" "acm_certificate_arn")
-        for output in "${OUTPUTS[@]}"; do 
-          echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
-        done
-        
-        sed -i -e 's/%0A//g' terraform.outputs
-        aws s3 cp terraform.outputs s3://$S3_BUCKET
-      working-directory: ./infra
-
-  frontend:
-    needs: [cf-infra]
-    name: 'Frontend - React/Node'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.18.1]
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
-    
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./frontend/
-    
-    - name: Run tests
-      run: npm test
-      working-directory: ./frontend/
-    
-    - name: Build
-      run: npm run build
-      working-directory: ./frontend/
-    
-    - name: Deploy to S3
-      run: |
-        export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        source terraform.outputs
-
-        package_version=$(cat package.json \
-          | grep version \
-          | head -1 \
-          | awk -F: '{ print $2 }' \
-          | sed 's/[",]//g' \
-          | tr -d '[[:space:]]')
-
-        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
-        aws s3 sync ./build s3://$frontend_bucket
-      working-directory: ./frontend/
 
   backend:
     needs: [main-infra]
@@ -272,6 +161,128 @@ jobs:
         kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
         kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
       working-directory: ./k8s/
+
+  cf-infra:
+    # needs: [k8s]
+    name: 'Infra - Cloudfront distribution'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: us-east-1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.12.28
+
+    - name: Zip Lambda@Edge Payload
+      run: zip -r lambda_edge_payload.zip lambda_edge_function.js
+      working-directory: ./infra/modules/cloudfront_multiorigin/resources
+
+    - name: Terraform Init
+      run: |
+        terraform init -backend-config=./envs/dev.backend.tf
+      working-directory: ./infra/modules/cloudfront_multiorigin
+
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infra/modules/cloudfront_multiorigin
+
+    - name: Terraform Plan
+      run: |
+        export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
+        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+
+        terraform plan -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}"
+      working-directory: ./infra/modules/cloudfront_multiorigin
+
+    - name: Terraform Apply
+      run: |
+        export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
+        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+
+        terraform apply -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -auto-approve
+      working-directory: ./infra/modules/cloudfront_multiorigin
+
+    - name: Terraform Outputs
+      run: |
+        export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs 
+
+        OUTPUTS=("frontend_bucket")
+        for output in "${OUTPUTS[@]}"; do 
+          echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
+        done
+        
+        sed -i -e 's/%0A//g' terraform.outputs
+        aws s3 cp terraform.outputs s3://$S3_BUCKET
+      working-directory: ./infra/modules/cloudfront_multiorigin
+
+  frontend:
+    needs: [cf-infra]
+    name: 'Frontend - React/Node'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.18.1]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: us-east-1
+    
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./frontend/
+    
+    - name: Run tests
+      run: npm test
+      working-directory: ./frontend/
+    
+    - name: Build
+      run: npm run build
+      working-directory: ./frontend/
+    
+    - name: Deploy to S3
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
+        package_version=$(cat package.json \
+          | grep version \
+          | head -1 \
+          | awk -F: '{ print $2 }' \
+          | sed 's/[",]//g' \
+          | tr -d '[[:space:]]')
+
+        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
+        aws s3 sync ./build s3://$frontend_bucket
+      working-directory: ./frontend/
 
   uptime:
     needs: [frontend]

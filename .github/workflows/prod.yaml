@@ -6,159 +6,159 @@ on:
       - ft-cf-alb-15
 
 jobs:
-  # main-infra:
-  #   name: 'Infra - Main'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  main-infra:
+    name: 'Infra - Main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-  #       aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-east-1
 
-  #   - name: Setup Terraform
-  #     uses: hashicorp/setup-terraform@v1
-  #     with:
-  #       terraform_version: 0.12.28
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.12.28
 
-  #   - name: Terraform Init
-  #     run: terraform init -backend-config=envs/prod.backend.tf
-  #     working-directory: ./infra
+    - name: Terraform Init
+      run: terraform init -backend-config=envs/prod.backend.tf
+      working-directory: ./infra
 
-  #   - name: Terraform Validate
-  #     run: terraform validate
-  #     working-directory: ./infra
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infra
 
-  #   - name: Terraform Plan
-  #     run: terraform plan -var-file="values/prod.tfvars"
-  #     working-directory: ./infra
+    - name: Terraform Plan
+      run: terraform plan -var-file="values/prod.tfvars"
+      working-directory: ./infra
 
-  #   - name: Terraform Apply
-  #     run: terraform apply -var-file="values/prod.tfvars" -auto-approve
-  #     working-directory: ./infra
+    - name: Terraform Apply
+      run: terraform apply -var-file="values/prod.tfvars" -auto-approve
+      working-directory: ./infra
 
-  #   - name: Terraform Outputs
-  #     run: |
-  #       export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+    - name: Terraform Outputs
+      run: |
+        export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         
-  #       OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "acm_certificate_arn")
-  #       for output in "${OUTPUTS[@]}"; do 
-  #         echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
-  #       done
+        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "acm_certificate_arn")
+        for output in "${OUTPUTS[@]}"; do 
+          echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
+        done
         
-  #       sed -i -e 's/%0A//g' terraform.outputs
-  #       aws s3 cp terraform.outputs s3://$S3_BUCKET
-  #     working-directory: ./infra
+        sed -i -e 's/%0A//g' terraform.outputs
+        aws s3 cp terraform.outputs s3://$S3_BUCKET
+      working-directory: ./infra
 
-  # backend:
-  #   needs: [main-infra]
-  #   name: 'Backend - Python'
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       python-version: [3.7]
+  backend:
+    needs: [main-infra]
+    name: 'Backend - Python'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
 
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Set up Python ${{ matrix.python-version }}
-  #     uses: actions/setup-python@v2
-  #     with:
-  #       python-version: ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-  #       aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-east-1
     
-  #   - name: Install dependencies
-  #     run: |
-  #       sudo pip install pipenv
-  #       pipenv sync --dev --three
-  #     working-directory: ./backend/
+    - name: Install dependencies
+      run: |
+        sudo pip install pipenv
+        pipenv sync --dev --three
+      working-directory: ./backend/
     
-  #   - name: Run tests
-  #     run: pipenv run coverage run --omit="tests/*" --include="app/*" --branch -m unittest discover -s tests/unit -p "*_test.py"
-  #     working-directory: ./backend/
+    - name: Run tests
+      run: pipenv run coverage run --omit="tests/*" --include="app/*" --branch -m unittest discover -s tests/unit -p "*_test.py"
+      working-directory: ./backend/
     
-  #   - name: Login to Amazon ECR
-  #     id: login-ecr
-  #     uses: aws-actions/amazon-ecr-login@v1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-  #   - name: Build and Deploy
-  #     run: |
-  #       export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
-  #       aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-  #       source terraform.outputs
+    - name: Build and Deploy
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
 
-  #       export app_version=$(cat config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
+        export app_version=$(cat config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
         
-  #       docker build -t $ecr_repository .
-  #       docker build -t $ecr_repository:$app_version .
+        docker build -t $ecr_repository .
+        docker build -t $ecr_repository:$app_version .
         
-  #       docker tag $ecr_repository:latest $ecr_repository_url:latest
-  #       docker push $ecr_repository_url:latest
+        docker tag $ecr_repository:latest $ecr_repository_url:latest
+        docker push $ecr_repository_url:latest
         
-  #       docker tag $ecr_repository:$app_version $ecr_repository_url:$app_version
-  #       docker push $ecr_repository_url:$app_version
-  #     working-directory: ./backend/
+        docker tag $ecr_repository:$app_version $ecr_repository_url:$app_version
+        docker push $ecr_repository_url:$app_version
+      working-directory: ./backend/
 
-  # k8s:
-  #   needs: [backend]
-  #   name: 'K8s'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+  k8s:
+    needs: [backend]
+    name: 'K8s'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   - name: Configure AWS Credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-  #       aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-east-1
     
-  #   - name: Login to Amazon ECR
-  #     id: ecr-login
-  #     uses: aws-actions/amazon-ecr-login@v1
-  #   - name: Resolve placeholders
-  #     run: |
-  #       export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
-  #       aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-  #       source terraform.outputs
+    - name: Login to Amazon ECR
+      id: ecr-login
+      uses: aws-actions/amazon-ecr-login@v1
+    - name: Resolve placeholders
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
 
-  #       export ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
-  #       export ECR_REPOSITORY_URL="${ecr_repository_url}"
-  #       export CERT_ARN="${acm_certificate_arn}"
-  #       export IMAGE_TAG="latest"
-  #       export K8S_NAMESPACE="happ-prod"
+        export ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+        export ECR_REPOSITORY_URL="${ecr_repository_url}"
+        export CERT_ARN="${acm_certificate_arn}"
+        export IMAGE_TAG="latest"
+        export K8S_NAMESPACE="happ-prod"
 
-  #       mkdir final
-  #       envsubst < namespace.yaml > final/namespace.yaml
-  #       envsubst < deployment.yaml > final/deployment.yaml
-  #       envsubst < service.yaml > final/service.yaml
-  #       envsubst < ingress.yaml > final/ingress.yaml
-  #     working-directory: ./k8s/
+        mkdir final
+        envsubst < namespace.yaml > final/namespace.yaml
+        envsubst < deployment.yaml > final/deployment.yaml
+        envsubst < service.yaml > final/service.yaml
+        envsubst < ingress.yaml > final/ingress.yaml
+      working-directory: ./k8s/
 
-  #   - name: K8s Deploy
-  #     run: |
-  #       export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
-  #       aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-  #       source terraform.outputs
+    - name: K8s Deploy
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
 
-  #       aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
-  #       kubectl apply -f final/namespace.yaml --kubeconfig ~/.kube/config
-  #       kubectl apply -f final/deployment.yaml --kubeconfig ~/.kube/config
-  #       kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
-  #       kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
-  #     working-directory: ./k8s/
+        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+        kubectl apply -f final/namespace.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/deployment.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
+      working-directory: ./k8s/
 
   cf-infra:
     # needs: [k8s]
