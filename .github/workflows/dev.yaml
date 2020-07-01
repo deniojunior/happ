@@ -213,9 +213,9 @@ jobs:
         source terraform.outputs
 
         aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
-        kubectl apply -f final/namespace.yaml
-        kubectl apply -f final/deployment.yaml
-        kubectl apply -f final/service.yaml
+        kubectl apply -f final/namespace.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/deployment.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
       working-directory: ./k8s/
 
   # uptime:
