@@ -187,8 +187,7 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
     - name: Terraform Init
-      run: |
-        terraform init -backend-config=./envs/dev.backend.tf
+      run: terraform init -backend-config=./envs/dev.backend.tf
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Validate
@@ -200,20 +199,12 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Apply
-      run: |
-        export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        source terraform.outputs
-
-        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
-
-        terraform apply -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -auto-approve
+      run: terraform apply -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -auto-approve
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Outputs
       run: |
         export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs 
 
         OUTPUTS=("frontend_bucket")
         for output in "${OUTPUTS[@]}"; do 
