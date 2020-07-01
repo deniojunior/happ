@@ -9,169 +9,169 @@ on:
       - dev
 
 jobs:
-  infra:
-    name: 'Infra - Terraform'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  # infra:
+  #   name: 'Infra - Terraform'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+  #       aws-region: us-east-1
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.12.28
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 0.12.28
 
-    - name: Zip Lambda@Edge Payload
-      run: zip -r lambda_edge_payload.zip lambda_edge_function.js
-      working-directory: ./infra/modules/cloudfront_multiorigin/resources
+  #   - name: Zip Lambda@Edge Payload
+  #     run: zip -r lambda_edge_payload.zip lambda_edge_function.js
+  #     working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
-    - name: Terraform Init
-      run: terraform init -backend-config=envs/dev.backend.tf
-      working-directory: ./infra
+  #   - name: Terraform Init
+  #     run: terraform init -backend-config=envs/dev.backend.tf
+  #     working-directory: ./infra
 
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ./infra
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ./infra
 
-    - name: Terraform Plan
-      run: terraform plan -var-file="values/dev.tfvars"
-      working-directory: ./infra
+  #   - name: Terraform Plan
+  #     run: terraform plan -var-file="values/dev.tfvars"
+  #     working-directory: ./infra
 
-    - name: Terraform Apply
-      run: terraform apply -var-file="values/dev.tfvars" -auto-approve
-      working-directory: ./infra
+  #   - name: Terraform Apply
+  #     run: terraform apply -var-file="values/dev.tfvars" -auto-approve
+  #     working-directory: ./infra
 
-    - name: Terraform Outputs
-      run: |
-        export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+  #   - name: Terraform Outputs
+  #     run: |
+  #       export S3_BUCKET="$(cat envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
         
-        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "frontend_bucket" "acm_certificate_arn")
-        for output in "${OUTPUTS[@]}"; do 
-          echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
-        done
+  #       OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "frontend_bucket" "acm_certificate_arn")
+  #       for output in "${OUTPUTS[@]}"; do 
+  #         echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
+  #       done
         
-        sed -i -e 's/%0A//g' terraform.outputs
-        aws s3 cp terraform.outputs s3://$S3_BUCKET
-      working-directory: ./infra
+  #       sed -i -e 's/%0A//g' terraform.outputs
+  #       aws s3 cp terraform.outputs s3://$S3_BUCKET
+  #     working-directory: ./infra
 
-  frontend:
-    needs: [infra]
-    name: 'Frontend - React/Node'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.18.1]
+  # frontend:
+  #   needs: [infra]
+  #   name: 'Frontend - React/Node'
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: [12.18.1]
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+  #   - name: Setup Node.js ${{ matrix.node-version }}
+  #     uses: actions/setup-node@v1
+  #     with:
+  #       node-version: ${{ matrix.node-version }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+  #       aws-region: us-east-1
     
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./frontend/
+  #   - name: Install dependencies
+  #     run: npm install
+  #     working-directory: ./frontend/
     
-    - name: Run tests
-      run: npm test
-      working-directory: ./frontend/
+  #   - name: Run tests
+  #     run: npm test
+  #     working-directory: ./frontend/
     
-    - name: Build
-      run: npm run build
-      working-directory: ./frontend/
+  #   - name: Build
+  #     run: npm run build
+  #     working-directory: ./frontend/
     
-    - name: Deploy to S3
-      run: |
-        export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        source terraform.outputs
+  #   - name: Deploy to S3
+  #     run: |
+  #       export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+  #       aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+  #       source terraform.outputs
 
-        package_version=$(cat package.json \
-          | grep version \
-          | head -1 \
-          | awk -F: '{ print $2 }' \
-          | sed 's/[",]//g' \
-          | tr -d '[[:space:]]')
+  #       package_version=$(cat package.json \
+  #         | grep version \
+  #         | head -1 \
+  #         | awk -F: '{ print $2 }' \
+  #         | sed 's/[",]//g' \
+  #         | tr -d '[[:space:]]')
 
-        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
-        aws s3 sync ./build s3://$frontend_bucket
-      working-directory: ./frontend/
+  #       aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
+  #       aws s3 sync ./build s3://$frontend_bucket
+  #     working-directory: ./frontend/
 
-  backend:
-    needs: [infra]
-    name: 'Backend - Python'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7]
+  # backend:
+  #   needs: [infra]
+  #   name: 'Backend - Python'
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: [3.7]
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+  #   - name: Set up Python ${{ matrix.python-version }}
+  #     uses: actions/setup-python@v2
+  #     with:
+  #       python-version: ${{ matrix.python-version }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+  #       aws-region: us-east-1
     
-    - name: Install dependencies
-      run: |
-        sudo pip install pipenv
-        pipenv sync --dev --three
-      working-directory: ./backend/
+  #   - name: Install dependencies
+  #     run: |
+  #       sudo pip install pipenv
+  #       pipenv sync --dev --three
+  #     working-directory: ./backend/
     
-    - name: Run tests
-      run: pipenv run coverage run --omit="tests/*" --include="app/*" --branch -m unittest discover -s tests/unit -p "*_test.py"
-      working-directory: ./backend/
+  #   - name: Run tests
+  #     run: pipenv run coverage run --omit="tests/*" --include="app/*" --branch -m unittest discover -s tests/unit -p "*_test.py"
+  #     working-directory: ./backend/
     
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+  #   - name: Login to Amazon ECR
+  #     id: login-ecr
+  #     uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and Deploy
-      run: |
-        export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        source terraform.outputs
+  #   - name: Build and Deploy
+  #     run: |
+  #       export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
+  #       aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+  #       source terraform.outputs
 
-        export app_version=$(cat config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
+  #       export app_version=$(cat config.yaml | grep -oP "(?<=version:).*" | tr -d '[:space:]')
         
-        docker build -t $ecr_repository .
-        docker build -t $ecr_repository:$app_version .
+  #       docker build -t $ecr_repository .
+  #       docker build -t $ecr_repository:$app_version .
         
-        docker tag $ecr_repository:latest $ecr_repository_url:latest
-        docker push $ecr_repository_url:latest
+  #       docker tag $ecr_repository:latest $ecr_repository_url:latest
+  #       docker push $ecr_repository_url:latest
         
-        docker tag $ecr_repository:$app_version $ecr_repository_url:$app_version
-        docker push $ecr_repository_url:$app_version
-      working-directory: ./backend/
+  #       docker tag $ecr_repository:$app_version $ecr_repository_url:$app_version
+  #       docker push $ecr_repository_url:$app_version
+  #     working-directory: ./backend/
 
   k8s:
-    needs: [backend]
+    # needs: [backend]
     name: 'K8s'
     runs-on: ubuntu-latest
     steps:
@@ -220,55 +220,55 @@ jobs:
         kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
       working-directory: ./k8s/
 
-  uptime:
-    needs: [frontend, backend]
-    name: 'Application Uptime'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Sleep ${{ secrets.INFRA_UPTIME_DEV }}
-      run: sleep ${{ secrets.INFRA_UPTIME_DEV }}
+  # uptime:
+  #   needs: [frontend, backend]
+  #   name: 'Application Uptime'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Sleep ${{ secrets.INFRA_UPTIME_DEV }}
+  #     run: sleep ${{ secrets.INFRA_UPTIME_DEV }}
   
-  infra-destroy:
-    needs: [uptime]
-    name: 'Destroy infra - Terraform'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  # infra-destroy:
+  #   needs: [uptime]
+  #   name: 'Destroy infra - Terraform'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+  #       aws-region: us-east-1
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.12.28
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 0.12.28
 
-    - name: Terraform Init
-      run: terraform init -backend-config=envs/dev.backend.tf
-      working-directory: ./infra
+  #   - name: Terraform Init
+  #     run: terraform init -backend-config=envs/dev.backend.tf
+  #     working-directory: ./infra
 
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ./infra
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ./infra
 
-    # Destroy all resources but terraform state module
-    - name: Terraform Destroy
-      run: |
-        echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge* | grep -vE *module.acm*)" > resources_to_destroy
-        sed -i '/\[command\]/d' resources_to_destroy
-        sed -i '/::/d' resources_to_destroy
+  #   # Destroy all resources but terraform state module
+  #   - name: Terraform Destroy
+  #     run: |
+  #       echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge* | grep -vE *module.acm*)" > resources_to_destroy
+  #       sed -i '/\[command\]/d' resources_to_destroy
+  #       sed -i '/::/d' resources_to_destroy
 
-        echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
+  #       echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
 
-        while read resource; do
-          echo "-target='$resource' \\" >> destroy_script.sh
-        done < resources_to_destroy
+  #       while read resource; do
+  #         echo "-target='$resource' \\" >> destroy_script.sh
+  #       done < resources_to_destroy
         
-        sed -i '$ s/.$//' destroy_script.sh
-        bash destroy_script.sh;
-      working-directory: ./infra
+  #       sed -i '$ s/.$//' destroy_script.sh
+  #       bash destroy_script.sh;
+  #     working-directory: ./infra
