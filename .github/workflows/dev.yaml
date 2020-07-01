@@ -196,14 +196,7 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Plan
-      run: |
-        export S3_BUCKET="$(cat ./envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
-        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
-        source terraform.outputs
-
-        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
-
-        terraform plan -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}"
+      run: terraform plan -var-file="values/dev.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}"
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Apply
