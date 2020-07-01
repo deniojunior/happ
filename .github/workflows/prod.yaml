@@ -200,6 +200,8 @@ jobs:
       run: |
         export S3_BUCKET="$(cat ../../envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
         aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
 
         terraform plan -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}"
@@ -209,6 +211,8 @@ jobs:
       run: |
         export S3_BUCKET="$(cat ../../envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+        
         aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
 
         terraform apply -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -auto-approve
