@@ -200,6 +200,7 @@ jobs:
         export IMAGE_TAG="latest"
         export K8S_NAMESPACE="happ-dev"
 
+        envsubst < namespace.yaml > final/namespace.yaml
         envsubst < deployment.yaml > final/deployment.yaml
         envsubst < service.yaml > final/service.yaml
       working-directory: ./k8s/
@@ -214,59 +215,60 @@ jobs:
         source terraform.outputs
 
         aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+        kubectl apply -f final/namespace.yaml
         kubectl apply -f final/deployment.yaml
         kubectl apply -f final/service.yaml
       working-directory: ./k8s/
 
-  uptime:
-    needs: [frontend, backend]
-    name: 'Application Uptime'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Sleep ${{ secrets.INFRA_UPTIME_DEV }}
-      run: sleep ${{ secrets.INFRA_UPTIME_DEV }}
+  # uptime:
+  #   needs: [frontend, backend]
+  #   name: 'Application Uptime'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Sleep ${{ secrets.INFRA_UPTIME_DEV }}
+  #     run: sleep ${{ secrets.INFRA_UPTIME_DEV }}
   
-  infra-destroy:
-    needs: [uptime]
-    name: 'Destroy infra - Terraform'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  # infra-destroy:
+  #   needs: [uptime]
+  #   name: 'Destroy infra - Terraform'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        aws-region: us-east-1
+  #   - name: Configure AWS Credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+  #       aws-region: us-east-1
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.12.28
+  #   - name: Setup Terraform
+  #     uses: hashicorp/setup-terraform@v1
+  #     with:
+  #       terraform_version: 0.12.28
 
-    - name: Terraform Init
-      run: terraform init -backend-config=envs/dev.backend.tf
-      working-directory: ./infra
+  #   - name: Terraform Init
+  #     run: terraform init -backend-config=envs/dev.backend.tf
+  #     working-directory: ./infra
 
-    - name: Terraform Validate
-      run: terraform validate
-      working-directory: ./infra
+  #   - name: Terraform Validate
+  #     run: terraform validate
+  #     working-directory: ./infra
 
-    # Destroy all resources but terraform state module
-    - name: Terraform Destroy
-      run: |
-        echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge*)" > resources_to_destroy
-        sed -i '/\[command\]/d' resources_to_destroy
-        sed -i '/::/d' resources_to_destroy
+  #   # Destroy all resources but terraform state module
+  #   - name: Terraform Destroy
+  #     run: |
+  #       echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge*)" > resources_to_destroy
+  #       sed -i '/\[command\]/d' resources_to_destroy
+  #       sed -i '/::/d' resources_to_destroy
 
-        echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
+  #       echo 'terraform destroy -auto-approve -var-file="values/dev.tfvars" \' > destroy_script.sh
 
-        while read resource; do
-          echo "-target='$resource' \\" >> destroy_script.sh
-        done < resources_to_destroy
+  #       while read resource; do
+  #         echo "-target='$resource' \\" >> destroy_script.sh
+  #       done < resources_to_destroy
         
-        sed -i '$ s/.$//' destroy_script.sh
-        bash destroy_script.sh;
-      working-directory: ./infra
+  #       sed -i '$ s/.$//' destroy_script.sh
+  #       bash destroy_script.sh;
+  #     working-directory: ./infra
