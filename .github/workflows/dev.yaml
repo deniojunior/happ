@@ -200,6 +200,7 @@ jobs:
         export IMAGE_TAG="latest"
         export K8S_NAMESPACE="happ-dev"
 
+        mkdir final
         envsubst < namespace.yaml > final/namespace.yaml
         envsubst < deployment.yaml > final/deployment.yaml
         envsubst < service.yaml > final/service.yaml
@@ -259,7 +260,7 @@ jobs:
   #   # Destroy all resources but terraform state module
   #   - name: Terraform Destroy
   #     run: |
-  #       echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge*)" > resources_to_destroy
+  #       echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge* | grep -vE *module.acm*)" > resources_to_destroy
   #       sed -i '/\[command\]/d' resources_to_destroy
   #       sed -i '/::/d' resources_to_destroy
 
