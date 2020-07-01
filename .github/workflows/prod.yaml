@@ -161,7 +161,7 @@ jobs:
       working-directory: ./k8s/
 
   cf-infra:
-    # needs: [k8s]
+    needs: [k8s]
     name: 'Infra - Cloudfront distribution'
     runs-on: ubuntu-latest
     steps:
