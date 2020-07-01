@@ -102,8 +102,8 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
-    acm_certificate_arn = module.acm.this_acm_certificate_arn
-    ssl_support_method = "sni-only"
+    acm_certificate_arn            = module.acm.this_acm_certificate_arn
+    ssl_support_method             = "sni-only"
   }
 
   depends_on = [
@@ -126,21 +126,21 @@ resource "aws_route53_record" "cname" {
 }
 
 resource "aws_lambda_function" "lambda_edge" {
-  filename         = "./resources/lambda_edge_payload.zip"
-  function_name    = "${local.resource}-lambda-edge"
-  role             = aws_iam_role.lambda_edge_role.arn
-  handler          = "lambda_edge_function.handler"
-  runtime          = "nodejs12.x"
-  publish          = true
-  
-  tags             = merge(local.tags, {Name = "${local.resource}-lambda-edge"})
+  filename      = "./resources/lambda_edge_payload.zip"
+  function_name = "${local.resource}-lambda-edge"
+  role          = aws_iam_role.lambda_edge_role.arn
+  handler       = "lambda_edge_function.handler"
+  runtime       = "nodejs12.x"
+  publish       = true
+
+  tags             = merge(local.tags, { Name = "${local.resource}-lambda-edge" })
   source_code_hash = "filebase64sha256(./resources/lambda_edge_payload.zip)"
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
   name = "${local.resource}-lambda-edge-iam-role"
 
-  tags = merge(local.tags, {Name = "${local.resource}-lambda-role"})
+  tags = merge(local.tags, { Name = "${local.resource}-lambda-role" })
 
   assume_role_policy = <<EOF
 {
@@ -161,7 +161,7 @@ EOF
 resource "aws_iam_policy" "lambda_edge_policy" {
   name = "${local.resource}-lambda-edge-iam-policy"
 
-  policy =  <<EOF
+  policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -235,7 +235,7 @@ module "acm" {
 
 data "kubernetes_ingress" "ingress" {
   metadata {
-    name = "ingress"
+    name      = "ingress"
     namespace = "${var.app}-${var.env}"
   }
 }

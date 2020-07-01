@@ -23,13 +23,3 @@ variable "aws_route53_zone" {
   type        = string
   description = "Route 53 zone name"
 }
-
-variable "route53_zone" {
-  type        = string
-  description = "Route 53 zone name"
-}
-
-variable "route53_zone_id" {
-  type        = string
-  description = "Route 53 zone identifier"
-}
