@@ -205,10 +205,7 @@ jobs:
         envsubst < deployment.yaml > final/deployment.yaml
         envsubst < service.yaml > final/service.yaml
       working-directory: ./k8s/
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        IMAGE_TAG: latest
-        K8S_NAMESPACE: happ-ns
+
     - name: K8s Deploy
       run: |
         export S3_BUCKET="$(cat ../infra/envs/dev.backend.tf | grep bucket | cut -d'"' -f 2)"
