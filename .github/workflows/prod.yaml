@@ -230,7 +230,7 @@ jobs:
         
         sed -i -e 's/%0A//g' terraform.outputs
         aws s3 cp terraform.outputs s3://$S3_BUCKET
-      working-directory: ./infra
+      working-directory: ./infra/modules/cloudfront_multiorigin
 
   frontend:
     needs: [cf-infra]
