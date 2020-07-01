@@ -24,7 +24,7 @@ jobs:
       with:
         terraform_version: 0.12.28
 
-    - name: Zip Lambda Edge Payload
+    - name: Zip Lambda@Edge Payload
       run: zip -r lambda_edge_payload.zip lambda_edge_function.js
       working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
@@ -48,7 +48,7 @@ jobs:
       run: |
         export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         
-        OUTPUTS=("ecr_repository" "ecr_repository_url" "frontend_bucket")
+        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "frontend_bucket")
         for output in "${OUTPUTS[@]}"; do 
           echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
         done
@@ -56,6 +56,59 @@ jobs:
         sed -i -e 's/%0A//g' terraform.outputs
         aws s3 cp terraform.outputs s3://$S3_BUCKET
       working-directory: ./infra
+
+  frontend:
+    needs: [infra]
+    name: 'Frontend - React/Node'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.18.1]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-east-1
+    
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./frontend/
+    
+    - name: Run tests
+      run: npm test
+      working-directory: ./frontend/
+    
+    - name: Build
+      run: npm run build
+      working-directory: ./frontend/
+    
+    - name: Deploy to S3
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
+        package_version=$(cat package.json \
+          | grep version \
+          | head -1 \
+          | awk -F: '{ print $2 }' \
+          | sed 's/[",]//g' \
+          | tr -d '[[:space:]]')
+
+        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
+        aws s3 sync ./build s3://$frontend_bucket
+      working-directory: ./frontend/
 
   backend:
     needs: [infra]
@@ -113,22 +166,13 @@ jobs:
         docker push $ecr_repository_url:$app_version
       working-directory: ./backend/
 
-  frontend:
-    needs: [infra]
-    name: 'Frontend - React/Node'
+  k8s:
+    needs: [backend]
+    name: 'K8s - Helm'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.18.1]
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -137,34 +181,39 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
         aws-region: us-east-1
     
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./frontend/
-    
-    - name: Run tests
-      run: npm test
-      working-directory: ./frontend/
-    
-    - name: Build
-      run: npm run build
-      working-directory: ./frontend/
-    
-    - name: Deploy to S3
+    - name: Login to Amazon ECR
+      id: ecr-login
+      uses: aws-actions/amazon-ecr-login@v1
+    - name: Resolve placeholders
       run: |
         export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
 
-        package_version=$(cat package.json \
-          | grep version \
-          | head -1 \
-          | awk -F: '{ print $2 }' \
-          | sed 's/[",]//g' \
-          | tr -d '[[:space:]]')
+        export ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+        export ECR_REPOSITORY_URL="${ecr_repository_url}"
+        export IMAGE_TAG="latest"
+        export K8S_NAMESPACE="happ-prod"
 
-        aws s3 sync ./build  s3://$frontend_bucket/_versions/$package_version
-        aws s3 sync ./build s3://$frontend_bucket
-      working-directory: ./frontend/
+        mkdir final
+        envsubst < namespace.yaml > final/namespace.yaml
+        envsubst < deployment.yaml > final/deployment.yaml
+        envsubst < service.yaml > final/service.yaml
+        envsubst < ingress.yaml > final/ingress.yaml
+      working-directory: ./k8s/
+
+    - name: K8s Deploy
+      run: |
+        export S3_BUCKET="$(cat ../infra/envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        source terraform.outputs
+
+        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+        kubectl apply -f final/namespace.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/deployment.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
+      working-directory: ./k8s/
 
   uptime:
     needs: [frontend, backend]
@@ -205,7 +254,7 @@ jobs:
     # Destroy all resources but terraform state module
     - name: Terraform Destroy
       run: |
-        echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge*)" > resources_to_destroy
+        echo "$(terraform state list | grep -vE module.terraform_state_backend* | grep -vE *lambda_edge* | grep -vE *module.acm*)" > resources_to_destroy
         sed -i '/\[command\]/d' resources_to_destroy
         sed -i '/::/d' resources_to_destroy
 
