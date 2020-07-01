@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - prod
-      - ft-cf-alb-15
 
 jobs:
   main-infra:
