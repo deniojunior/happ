@@ -8,6 +8,11 @@ output "ecr_repository_url" {
   description = "ECR repository URL"
 }
 
+output "eks_cluster_name" {
+  value       = module.eks.cluster_id
+  description = "EKS cluster identifier/name"
+}
+
 output "frontend_bucket" {
   value       = module.s3_bucket.this_s3_bucket_id
   description = "Frontend s3 bucket"

@@ -89,7 +89,7 @@ module "cloufront_multiorigin" {
 
   module_depends_on = [
     module.acm,
-    module.alb,
+    module.alb_ingress_controller,
     module.s3_bucket
   ]
 
@@ -103,9 +103,19 @@ module "vpc" {
   name = "${local.resource}-vpc"
   cidr = var.vpc_cidr
 
-  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
+  azs = ["${var.aws_region}a", "${var.aws_region}b"]
+
   private_subnets = var.vpc_private_subnets
-  public_subnets  = var.vpc_public_subnets
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.resource}-eks" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
+  }
+
+  public_subnets = var.vpc_public_subnets
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.resource}-eks" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
+  }
 
   enable_nat_gateway = true
   enable_vpn_gateway = true
@@ -135,6 +145,7 @@ module "eks" {
   cluster_version = "1.16"
   subnets         = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
+  enable_irsa     = true
 
   worker_groups = [
     {
@@ -146,31 +157,19 @@ module "eks" {
   tags = merge(local.tags, { Name = "${local.resource}-eks" })
 }
 
-module "alb" {
-  source                            = "git::https://github.com/cloudposse/terraform-aws-alb.git?ref=tags/0.7.0"
-  name                              = local.resource
-  vpc_id                            = module.vpc.vpc_id
-  security_group_ids                = [module.vpc.default_security_group_id]
-  subnet_ids                        = module.vpc.public_subnets
-  http_enabled                      = true
-  cross_zone_load_balancing_enabled = true
-  ip_address_type                   = "ipv4"
-  target_group_port                 = 80
-  target_group_target_type          = "ip"
-  access_logs_enabled               = false
-  health_check_path                 = var.app_health_check_path
-  tags                              = merge(local.tags, { Name = "${local.resource}-alb" })
-}
+module "alb_ingress_controller" {
+  source  = "iplabs/alb-ingress-controller/kubernetes"
+  version = "3.4.0"
 
+  providers = {
+    kubernetes = kubernetes
+  }
 
-module "alb_ingress" {
-  source                              = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=master"
-  name                                = local.resource
-  vpc_id                              = module.vpc.vpc_id
-  default_target_group_enabled        = false
-  target_group_arn                    = module.alb.default_target_group_arn
-  unauthenticated_listener_arns       = [module.alb.http_listener_arn]
-  unauthenticated_listener_arns_count = 1
+  k8s_cluster_type = "eks"
+  k8s_namespace    = "kube-system"
 
-  tags = merge(local.tags, { Name = "${local.resource}-alb-ingress" })
+  aws_region_name  = var.aws_region
+  k8s_cluster_name = data.aws_eks_cluster.cluster.name
+
+  aws_tags = merge(local.tags, { Name = "${local.resource}-eks" })
 }
