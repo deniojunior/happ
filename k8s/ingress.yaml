@@ -23,7 +23,7 @@ spec:
             backend:
               serviceName: default-service
               servicePort: 80
-              - path: /*
-              backend:
-                serviceName: https-service
-                servicePort: 443
+          - path: /*
+            backend:
+              serviceName: https-service
+              servicePort: 443
