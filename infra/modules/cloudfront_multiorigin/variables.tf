@@ -28,10 +28,10 @@ variable "s3_bucket_id" {
   description = "S3 Bucket origin identifier"
 }
 
-variable "alb_dns" {
-  type        = string
-  description = "ALB DNS origin"
-}
+# variable "alb_dns" {
+#   type        = string
+#   description = "ALB DNS origin"
+# }
 
 variable "acm_certificate_arn" {
   type        = string
