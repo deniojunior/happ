@@ -14,7 +14,7 @@ spec:
         app: "backend"
     spec:
       containers:
-      - image: $ECR_REGISTRY/$ECR_REPOSITORY_URL:$IMAGE_TAG
+      - image: $ECR_REPOSITORY_URL:$IMAGE_TAG
         imagePullPolicy: Always
         name: "backend"
         ports:
