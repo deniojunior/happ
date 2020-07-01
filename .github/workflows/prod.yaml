@@ -203,8 +203,9 @@ jobs:
         source terraform.outputs
 
         aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+        export alb_dns="$(kubectl describe ingress -n happ-prod --kubeconfig ~/.kube/config | grep -oP "Address:.*" | awk  '{print $2}')"
 
-        terraform plan -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}"
+        terraform plan -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -var="alb_dns=${alb_dns}"
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Apply
@@ -212,10 +213,11 @@ jobs:
         export S3_BUCKET="$(cat ../../envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
         source terraform.outputs
-        
-        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
 
-        terraform apply -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -auto-approve
+        aws eks --region us-east-1 update-kubeconfig --name $eks_cluster_name
+        terraform plan -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -var="alb_dns=${alb_dns}"
+
+        terraform apply -var-file="values/prod.tfvars" -var="acm_certificate_arn=${acm_certificate_arn}" -var="alb_dns=${alb_dns}" -auto-approve
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Outputs

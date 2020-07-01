@@ -69,7 +69,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     path_pattern     = "/backend"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
+    target_origin_id = var.alb_dns
 
     forwarded_values {
       query_string = false
@@ -217,11 +217,4 @@ module "s3_bucket" {
   ]
 }
 POLICY
-}
-
-data "kubernetes_ingress" "ingress" {
-  metadata {
-    name      = "ingress"
-    namespace = "${var.app}-${var.env}"
-  }
 }
