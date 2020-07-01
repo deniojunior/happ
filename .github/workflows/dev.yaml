@@ -204,6 +204,7 @@ jobs:
         envsubst < namespace.yaml > final/namespace.yaml
         envsubst < deployment.yaml > final/deployment.yaml
         envsubst < service.yaml > final/service.yaml
+        envsubst < ingress.yaml > final/ingress.yaml
       working-directory: ./k8s/
 
     - name: K8s Deploy
@@ -216,6 +217,7 @@ jobs:
         kubectl apply -f final/namespace.yaml --kubeconfig ~/.kube/config
         kubectl apply -f final/deployment.yaml --kubeconfig ~/.kube/config
         kubectl apply -f final/service.yaml --kubeconfig ~/.kube/config
+        kubectl apply -f final/ingress.yaml --kubeconfig ~/.kube/config
       working-directory: ./k8s/
 
   # uptime:
