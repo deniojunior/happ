@@ -15,7 +15,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
 
   origin {
     domain_name = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
-    origin_id = "${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}-id"
+    origin_id = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
   }
 
   enabled             = true
@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     
-    target_origin_id = "${var.alb_dns}-id"
+    target_origin_id = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
 
     forwarded_values {
       query_string = false
