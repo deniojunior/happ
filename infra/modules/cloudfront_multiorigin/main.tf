@@ -13,6 +13,11 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     origin_id   = module.s3_bucket.this_s3_bucket_id
   }
 
+  origin {
+    domain_name = var.alb_dns
+    origin_id = "${var.alb_dns}-id"
+  }
+
   enabled             = true
   default_root_object = "index.html"
 
@@ -70,8 +75,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
     
-    domain_name      = var.alb_dns
-    target_origin_id = var.alb_dns
+    target_origin_id = "${var.alb_dns}-id"
 
     forwarded_values {
       query_string = false
