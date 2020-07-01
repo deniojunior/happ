@@ -140,6 +140,7 @@ provider "kubernetes" {
 }
 
 module "eks" {
+  alias = "eks"
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "${local.resource}-eks"
   cluster_version = "1.16"
@@ -161,11 +162,11 @@ module "alb_ingress_controller" {
   version = "3.4.0"
 
   providers = {
-    kubernetes = "kubernetes"
+    kubernetes = "kubernetes.eks"
   }
 
   k8s_cluster_type = "eks"
-  k8s_namespace    = "kube-system"
+  k8s_namespace    = "${var.app}-${var.env}"
 
   aws_region_name  = var.aws_region
   k8s_cluster_name = data.aws_eks_cluster.cluster.name
