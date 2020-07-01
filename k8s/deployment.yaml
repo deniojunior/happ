@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "backend-deployment"
+  namespace: $K8S_NAMESPACE
+spec:
+  selector:
+    matchLabels:
+      app: "backend"
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "backend"
+    spec:
+      containers:
+      - image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        imagePullPolicy: Always
+        name: "backend"
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 400m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 768Mi
