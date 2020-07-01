@@ -45,7 +45,7 @@ jobs:
       run: |
         export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         
-        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name")
+        OUTPUTS=("ecr_repository" "ecr_repository_url" "eks_cluster_name" "acm_certificate_arn")
         for output in "${OUTPUTS[@]}"; do 
           echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
         done
@@ -91,11 +91,19 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Plan
-      run: terraform plan -var-file="values/prod.tfvars"
+      run: |
+        export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+
+        terraform plan -var-file="values/prod.tfvars" -var="acm_certificate_arn=$acm_certificate_arn"
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Apply
-      run: terraform apply -var-file="values/prod.tfvars" -auto-approve
+      run: |
+        export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
+        aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
+        
+        terraform apply -var-file="values/prod.tfvars" -var="acm_certificate_arn=$acm_certificate_arn" -auto-approve
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Outputs
@@ -103,7 +111,7 @@ jobs:
         export S3_BUCKET="$(cat envs/prod.backend.tf | grep bucket | cut -d'"' -f 2)"
         aws s3 cp s3://$S3_BUCKET/terraform.outputs terraform.outputs
 
-        OUTPUTS=("frontend_bucket" "acm_certificate_arn")
+        OUTPUTS=("frontend_bucket")
         for output in "${OUTPUTS[@]}"; do 
           echo "export $output=\"$(terraform output $output | grep -oP "(?<=::set-output name=stdout::).*")\" " >> terraform.outputs; 
         done
