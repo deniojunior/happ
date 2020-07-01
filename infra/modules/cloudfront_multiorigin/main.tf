@@ -11,6 +11,13 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   origin {
     domain_name = module.s3_bucket.this_s3_bucket_bucket_regional_domain_name
     origin_id   = module.s3_bucket.this_s3_bucket_id
+
+    custom_origin_config {
+      http_port              = "80"
+      https_port             = "443"
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
   }
 
   origin {
@@ -62,13 +69,6 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     max_ttl                = 86400
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
-
-    custom_origin_config {
-      http_port              = "80"
-      https_port             = "443"
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
 
     lambda_function_association {
       event_type   = "origin-request"
