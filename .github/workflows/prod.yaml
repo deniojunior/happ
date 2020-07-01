@@ -189,7 +189,7 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Workspace
-      run: terraform workspace new cf-infra
+      run: terraform workspace select cf-infra
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Validate
