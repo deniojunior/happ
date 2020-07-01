@@ -89,7 +89,7 @@ module "cloufront_multiorigin" {
 
   module_depends_on = [
     module.acm,
-    module.alb,
+    module.alb_ingress_controller,
     module.s3_bucket
   ]
 
@@ -103,18 +103,18 @@ module "vpc" {
   name = "${local.resource}-vpc"
   cidr = var.vpc_cidr
 
-  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
-  
+  azs = ["${var.aws_region}a", "${var.aws_region}b"]
+
   private_subnets = var.vpc_private_subnets
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.resource}-eks" = "shared"
-    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/role/internal-elb"             = "1"
   }
 
-  public_subnets  = var.vpc_public_subnets
+  public_subnets = var.vpc_public_subnets
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.resource}-eks" = "shared"
-    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/role/elb"                      = "1"
   }
 
   enable_nat_gateway = true
@@ -162,7 +162,7 @@ module "alb_ingress_controller" {
   version = "3.4.0"
 
   providers = {
-    kubernetes = "kubernetes"
+    kubernetes = kubernetes
   }
 
   k8s_cluster_type = "eks"
