@@ -55,7 +55,7 @@ jobs:
       working-directory: ./infra
     
   cf-infra:
-    needs: [main-infra]
+    needs: [backend]
     name: 'Infra - Cloudfront distribution'
     runs-on: ubuntu-latest
     steps:
@@ -166,7 +166,7 @@ jobs:
       working-directory: ./frontend/
 
   backend:
-    needs: [cf-infra]
+    needs: [main-infra]
     name: 'Backend - Python'
     runs-on: ubuntu-latest
     strategy:
