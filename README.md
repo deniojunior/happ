@@ -4,6 +4,8 @@
   style="float:left;"> 
 Happ
 
+![prod](https://github.com/deniojunior/happ/workflows/prod/badge.svg)
+
 ### 
 Happ é um projeto que provém uma infraestrutura completa para servir aplicações frontend e backend com alta disponibilidade, segurança, escalabilidade e tolerância a falhas.
 
