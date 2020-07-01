@@ -104,8 +104,18 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   azs             = ["${var.aws_region}a", "${var.aws_region}b"]
+  
   private_subnets = var.vpc_private_subnets
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.resource}-eks" = "shared"
+    "kubernetes.io/role/internal-elb" = "1"
+  }
+
   public_subnets  = var.vpc_public_subnets
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.resource}-eks" = "shared"
+    "kubernetes.io/role/elb" = "1"
+  }
 
   enable_nat_gateway = true
   enable_vpn_gateway = true
@@ -144,6 +154,21 @@ module "eks" {
   ]
 
   tags = merge(local.tags, { Name = "${local.resource}-eks" })
+}
+
+module "alb_ingress_controller" {
+  source  = "iplabs/alb-ingress-controller/kubernetes"
+  version = "3.4.0"
+
+  providers = {
+    kubernetes = "kubernetes"
+  }
+
+  k8s_cluster_type = "eks"
+  k8s_namespace    = "kube-system"
+
+  aws_region_name  = var.aws_region
+  k8s_cluster_name = data.aws_eks_cluster.cluster.name
 }
 
 module "alb" {
