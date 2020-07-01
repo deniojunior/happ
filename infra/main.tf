@@ -89,10 +89,10 @@ module "cloufront_multiorigin" {
   alb_dns                     = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
 
   module_depends_on = [
+    data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname,
     module.acm,
     module.alb_ingress_controller,
-    module.s3_bucket,
-    data.kubernetes_ingress.ingress
+    module.s3_bucket
   ]
 
   resource = local.resource
