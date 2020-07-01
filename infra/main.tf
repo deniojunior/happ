@@ -86,7 +86,7 @@ module "cloufront_multiorigin" {
   acm_certificate_arn         = module.acm.this_acm_certificate_arn
   route53_zone                = var.aws_route53_zone
   route53_zone_id             = data.aws_route53_zone.selected.id
-  # alb_dns                     = data.kubernetes_ingress.ingress.load_balancer_ingress[0]
+  alb_dns                     = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
 
   module_depends_on = [
     module.acm,
