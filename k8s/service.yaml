@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: "service"
   namespace: $K8S_NAMESPACE
+  annotation:
+    alb.ingress.kubernetes.io/backend-protocol: HTTPS
 spec:
   ports:
     - port: 80
