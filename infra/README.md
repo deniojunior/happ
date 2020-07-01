@@ -129,29 +129,65 @@ terraform plan -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route5
 terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
-A aplicação estará disponível em `https://happ.[route_53_zone]`;
-
-Exemplo:
+Exemplo com zona:
 
 ```bash
 terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=devsforlife.org"
 ```
+
+#### Cloudfront Distribution
+
+A distribuição do cloudfront ficou em um módulo que deve ser executado depois da criação do módulo principal, pois o ALB é criado pelo Ingress Controller, o que torna inviável para o Terraform saber se o ALB está disponível ou não, resultando em erro na criação da distribution do Cloudfront.
+
+Entre no módulo do cloudfront:
+
+```bash
+cd modules/cloudfront_multiorigin
+```
+
+Inicialize o terraform informando o arquivo de gerenciamento de estado criado anteriormente automáticamente na primeira execução:
+
+```bash
+terraform init -backend-config=../../backend.tf
+```
+
+Valide e planeje as alterações:
+
+```bash
+terraform validate
+terraform plan -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+```
+
+Aplique as alterações:
+
+```bash
+terraform apply -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
+```
+
+### Validação
+
+Assim que o processamento terminar, a aplicação estará disponível em `https://happ.[route_53_zone]`;
 
 - **Frontend:** https://happ.devsforlife.org/frontend
 - **Backend:** https://happ.devsforlife.org/backend
 
 #### Destruindo a infra criada
 
+Primeiramente, destrua a infra referente ao primeiro módulo:
+
+```bash
+terraform destroy -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=devsforlife.org"
+```
+
 Conforme issues https://github.com/terraform-providers/terraform-provider-aws/issues/1721 e https://github.com/terraform-providers/terraform-provider-aws/issues/5818, existe um bug atual ao deletar Lambda@Edge functions. A [documentação da aws](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-delete-replicas.html) diz que só é possível realizar a exclusão após uma desassociação do Lambda@Edge com o Cloudfront e esperar alguamas horas:
 
 > If you remove all the associations for a Lambda function version, you can typically delete the function version a few hours later.
 
-Dessa forma, sugiro rodar o script criado para deletar a infraestrutura, pois ele irá deletar todos os recursos, exceto o Lambda@Edge, o qual poderá ser deletado posteriormente de forma manual algumas horas depois.
+Dessa forma, sugiro rodar o script criado para deletar a infraestrutura com o cloudfront, pois ele irá deletar todos os recursos, exceto o Lambda@Edge, o qual poderá ser deletado posteriormente de forma manual algumas horas depois.
 
 ```bash
 bash scripts/destroy.sh -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
-
 
 ## Arquitetura
 
