@@ -8,6 +8,9 @@ spec:
     - port: 80
       targetPort: 8080
       protocol: TCP
+    - port: 443
+      targetPort: 8080
+      protocol: TCP
   type: NodePort
   selector:
     app: $K8S_NAMESPACE
