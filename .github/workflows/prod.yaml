@@ -185,11 +185,7 @@ jobs:
       working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
     - name: Terraform Init
-      run: terraform init -backend-config=../../envs/prod.backend.tf
-      working-directory: ./infra/modules/cloudfront_multiorigin
-
-    - name: Terraform Workspace
-      run: terraform workspace select cf-infra
+      run: terraform init -backend-config=../../envs/prod.backend.tf -backend-config="key=/cf-infra"
       working-directory: ./infra/modules/cloudfront_multiorigin
 
     - name: Terraform Validate
