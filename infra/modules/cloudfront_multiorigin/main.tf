@@ -63,6 +63,13 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     compress               = true
     viewer_protocol_policy = "redirect-to-https"
 
+    custom_origin_config {
+      http_port              = "80"
+      https_port             = "443"
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+
     lambda_function_association {
       event_type   = "origin-request"
       lambda_arn   = aws_lambda_function.lambda_edge.qualified_arn
