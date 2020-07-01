@@ -64,7 +64,7 @@ variable "lambda_edge_runtime" {
 }
 
 variable "module_depends_on" {
-  type        = list
+  type        = any
   description = "Resources that this module depends on"
   default     = []
 }

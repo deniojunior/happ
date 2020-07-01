@@ -28,7 +28,7 @@ jobs:
       with:
         terraform_version: 0.12.28
 
-    - name: Zip Lambda Edge Payload
+    - name: Zip Lambda@Edge Payload
       run: zip -r lambda_edge_payload.zip lambda_edge_function.js
       working-directory: ./infra/modules/cloudfront_multiorigin/resources
 
