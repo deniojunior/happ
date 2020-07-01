@@ -183,10 +183,17 @@ Assim que o processamento terminar, a aplicação estará disponível em `https:
 Primeiramente, destrua a infra referente ao primeiro módulo:
 
 ```bash
-terraform destroy -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=devsforlife.org"
+cd happ/infra
+terraform destroy -var-file=values/prod.tfvars -var="namespace=hm" -var="aws_route53_zone=[route_53_zone]"
 ```
 
-Conforme issues https://github.com/terraform-providers/terraform-provider-aws/issues/1721 e https://github.com/terraform-providers/terraform-provider-aws/issues/5818, existe um bug atual ao deletar Lambda@Edge functions. A [documentação da aws](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-delete-replicas.html) diz que só é possível realizar a exclusão após uma desassociação do Lambda@Edge com o Cloudfront e esperar alguamas horas:
+Posteriormente acesse o módulo cloudfront para a destruição  do mesmo:
+
+```bash
+cd happ/infra
+```
+
+:warning: **Atenção:** Conforme issues https://github.com/terraform-providers/terraform-provider-aws/issues/1721 e https://github.com/terraform-providers/terraform-provider-aws/issues/5818, existe um bug atual ao deletar Lambda@Edge functions. A [documentação da aws](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-delete-replicas.html) diz que só é possível realizar a exclusão após uma desassociação do Lambda@Edge com o Cloudfront e esperar alguamas horas:
 
 > If you remove all the associations for a Lambda function version, you can typically delete the function version a few hours later.
 

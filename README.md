@@ -19,7 +19,7 @@ Para centralizar, foram todos os projetos referentes ao **happ** foram incluído
 - **/frontend:** Aplicação frontend simples feita em React
 - **/backend:** Aplicação backend simples, sendo uma API básica feita em Python com Flask
 - **/infra:** Código IaC feito com Terraform descrevendo a infraestrutura da aplicação
-- **/k8s:** Conjunto de objetos declaravos que descrevem os componentes para rodar o backend no cluster Kubernetes
+- **/k8s:** Código declarativo de objetos que descrevem os componentes para rodar o backend no cluster Kubernetes
 
 ### Documentação
 
