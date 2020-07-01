@@ -150,7 +150,7 @@ cd modules/cloudfront_multiorigin
 Inicialize o terraform informando o arquivo de gerenciamento de estado criado anteriormente automáticamente na primeira execução:
 
 ```bash
-terraform init -backend-config=../../backend.tf
+terraform init 
 ```
 
 Valide:

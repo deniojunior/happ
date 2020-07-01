@@ -7,6 +7,19 @@ locals {
   }
 }
 
+module "terraform_state_backend" {
+  source                             = "git::https://github.com/cloudposse/terraform-aws-tfstate-backend.git?ref=master"
+  namespace                          = "${var.app}-${var.namespace}-cf-infra"
+  name                               = "terraform"
+  environment                        = var.env
+  attributes                         = ["state"]
+  region                             = "us-east-1"
+  terraform_backend_config_file_path = "."
+  terraform_backend_config_file_name = "backend.tf"
+  force_destroy                      = true
+  prevent_unencrypted_uploads        = false
+}
+
 resource "aws_cloudfront_distribution" "cf_distribution" {
   origin {
     domain_name = module.s3_bucket.this_s3_bucket_bucket_regional_domain_name
@@ -147,7 +160,7 @@ resource "aws_route53_record" "cname" {
 
 resource "aws_lambda_function" "lambda_edge" {
   filename      = "./resources/lambda_edge_payload.zip"
-  function_name = "${local.resource}-lambda-edge-function"
+  function_name = "${local.resource}-lambda-edge-func"
   role          = aws_iam_role.lambda_edge_role.arn
   handler       = "lambda_edge_function.handler"
   runtime       = "nodejs12.x"
