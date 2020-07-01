@@ -167,11 +167,8 @@ module "alb_ingress" {
   source                              = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=master"
   name                                = local.resource
   vpc_id                              = module.vpc.vpc_id
-  internal                            = false
-  http_enabled                        = true
   default_target_group_enabled        = false
   authentication_type                 = ""
-  ip_address_type                     = "ipv4"
   unauthenticated_priority            = 100
   unauthenticated_paths               = ["/", "/status"]
   target_group_arn                    = module.alb.default_target_group_arn
