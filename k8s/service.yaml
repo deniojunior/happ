@@ -6,7 +6,6 @@ metadata:
   annotation:
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
 spec:
-  type: LoadBalancer
   ports:
     - port: 80
       name: "http"
@@ -16,5 +15,6 @@ spec:
       name: "https"
       targetPort: 8080
       protocol: TCP
+  type: NodePort
   selector:
     app: $K8S_NAMESPACE
