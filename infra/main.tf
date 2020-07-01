@@ -91,7 +91,8 @@ module "cloufront_multiorigin" {
   module_depends_on = [
     module.acm,
     module.alb_ingress_controller,
-    module.s3_bucket
+    module.s3_bucket,
+    data.kubernetes_ingress.ingress
   ]
 
   resource = local.resource
