@@ -22,7 +22,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
 
   origin {
     domain_name = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
-    origin_id = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
+    origin_id   = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
 
     custom_origin_config {
       http_port              = "80"
@@ -85,10 +85,10 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   }
 
   ordered_cache_behavior {
-    path_pattern     = "/backend"
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    
+    path_pattern    = "/backend"
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+
     target_origin_id = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
 
     forwarded_values {
@@ -147,7 +147,7 @@ resource "aws_route53_record" "cname" {
 
 resource "aws_lambda_function" "lambda_edge" {
   filename      = "./resources/lambda_edge_payload.zip"
-  function_name = "${local.resource}-lambda-edge"
+  function_name = "${local.resource}-lambda-edge-function"
   role          = aws_iam_role.lambda_edge_role.arn
   handler       = "lambda_edge_function.handler"
   runtime       = "nodejs12.x"
