@@ -69,6 +69,8 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     path_pattern     = "/backend"
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
+    
+    domain_name      = var.alb_dns
     target_origin_id = var.alb_dns
 
     forwarded_values {
@@ -83,7 +85,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     default_ttl            = 3600
     max_ttl                = 86400
     compress               = true
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
 
     lambda_function_association {
       event_type   = "origin-request"
