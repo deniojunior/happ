@@ -14,8 +14,8 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
   }
 
   origin {
-    domain_name = var.alb_dns
-    origin_id = "${var.alb_dns}-id"
+    domain_name = data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname
+    origin_id = "${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}-id"
   }
 
   enabled             = true
@@ -223,4 +223,11 @@ module "s3_bucket" {
   ]
 }
 POLICY
+}
+
+data "kubernetes_ingress" "ingress" {
+  metadata {
+    name      = "ingress"
+    namespace = "${var.app}-${var.env}"
+  }
 }

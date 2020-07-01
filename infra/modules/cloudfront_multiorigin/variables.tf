@@ -32,4 +32,5 @@ variable "acm_certificate_arn" {
 variable "alb_dns" {
   type        = string
   description = "ALB DNS address"
+  default     = ""
 }
