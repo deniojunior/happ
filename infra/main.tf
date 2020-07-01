@@ -86,6 +86,7 @@ module "cloufront_multiorigin" {
   acm_certificate_arn         = module.acm.this_acm_certificate_arn
   route53_zone                = var.aws_route53_zone
   route53_zone_id             = data.aws_route53_zone.selected.id
+  alb_dns                     = data.kubernetes_ingress.ingress.load_balancer_ingress[0]
 
   module_depends_on = [
     module.acm,
@@ -155,6 +156,15 @@ module "eks" {
   ]
 
   tags = merge(local.tags, { Name = "${local.resource}-eks" })
+}
+
+data "kubernetes_ingress" "ingress" {
+  metadata {
+    name = "ingress"
+    namespace = "${var.app}-${var.env}"
+  }
+
+  depends_on = [module.alb_ingress_controller]
 }
 
 module "alb_ingress_controller" {
