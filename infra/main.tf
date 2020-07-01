@@ -116,10 +116,3 @@ module "acm" {
 
   tags = merge(local.tags, { Name = "${local.resource}-certificate" })
 }
-
-data "kubernetes_ingress" "ingress" {
-  metadata {
-    name      = "ingress"
-    namespace = "${var.app}-${var.env}"
-  }
-}

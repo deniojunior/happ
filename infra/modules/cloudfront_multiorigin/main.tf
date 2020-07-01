@@ -218,3 +218,10 @@ module "s3_bucket" {
 }
 POLICY
 }
+
+data "kubernetes_ingress" "ingress" {
+  metadata {
+    name      = "ingress"
+    namespace = "${var.app}-${var.env}"
+  }
+}
