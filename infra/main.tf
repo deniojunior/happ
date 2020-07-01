@@ -170,36 +170,6 @@ module "alb_ingress_controller" {
 
   aws_region_name  = var.aws_region
   k8s_cluster_name = data.aws_eks_cluster.cluster.name
-}
 
-module "alb" {
-  source                            = "git::https://github.com/cloudposse/terraform-aws-alb.git?ref=tags/0.7.0"
-  name                              = local.resource
-  vpc_id                            = module.vpc.vpc_id
-  security_group_ids                = [module.vpc.default_security_group_id]
-  subnet_ids                        = module.vpc.public_subnets
-  http_enabled                      = true
-  cross_zone_load_balancing_enabled = true
-  ip_address_type                   = "ipv4"
-  target_group_port                 = 80
-  target_group_target_type          = "ip"
-  access_logs_enabled               = false
-  health_check_path                 = var.app_health_check_path
-  tags                              = merge(local.tags, { Name = "${local.resource}-alb" })
-}
-
-
-module "alb_ingress" {
-  source                              = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=master"
-  name                                = local.resource
-  vpc_id                              = module.vpc.vpc_id
-  default_target_group_enabled        = false
-  authentication_type                 = ""
-  unauthenticated_priority            = 100
-  unauthenticated_paths               = ["/", "/status"]
-  target_group_arn                    = module.alb.default_target_group_arn
-  unauthenticated_listener_arns       = [module.alb.http_listener_arn]
-  unauthenticated_listener_arns_count = 1
-
-  tags = merge(local.tags, { Name = "${local.resource}-alb-ingress" })
+  aws_tags = merge(local.tags, { Name = "${local.resource}-eks" })
 }
