@@ -5,7 +5,7 @@ module.exports.handler = (event, context, callback) => {
   
   // Remove context before origin connection
   request.uri = request.uri.replace(/^\/frontend/, "/index.html");
-  request.uri = request.uri.replace(/^\/backend/, "");
+  request.uri = request.uri.replace(/^\/backend/, "/");
   
   callback(null, request);
 };
