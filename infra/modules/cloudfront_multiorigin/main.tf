@@ -40,7 +40,7 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     custom_origin_config {
       http_port              = "80"
       https_port             = "443"
-      origin_protocol_policy = "http-only"
+      origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
     }
   }
@@ -105,7 +105,9 @@ resource "aws_cloudfront_distribution" "cf_distribution" {
     target_origin_id = "ELB-${data.kubernetes_ingress.ingress.load_balancer_ingress.0.hostname}"
 
     forwarded_values {
-      query_string = false
+      query_string            = true
+      query_string_cache_keys = true
+      headers                 = ["Referer", "Origin", "Host", "Authorization", "Accept-Language"]
 
       cookies {
         forward = "none"
